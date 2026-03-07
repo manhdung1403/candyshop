@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>🍬 CandyShop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff0f5;
+        }
+
+        header {
+            background: linear-gradient(135deg, #e91e8c, #ff6b35);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2em;
+        }
+
+        header p {
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+
+        .search-bar {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .search-bar input {
+            padding: 12px 20px;
+            width: 350px;
+            border-radius: 25px;
+            border: 2px solid #e91e8c;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px 40px;
+            justify-content: center;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            width: 220px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #e91e8c;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .price {
+            color: #ff6b35;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .stock {
+            color: #4caf50;
+            font-size: 13px;
+        }
+
+        .btn {
+            background: #e91e8c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 12px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #c2185b;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            border-top: 1px solid #ffd6ea;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🍬 CandyShop</h1>
+        <p>Thiên Đường Kẹo Ngọt - Dự án đồ án cuối kỳ</p>
+    </header>
+
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm kẹo..." oninput="searchProducts()">
+    </div>
+
+    <div class="products" id="productList">
+        <div th:if="${products.empty}" class="empty">
+            Chưa có sản phẩm nào. Hãy thêm sản phẩm vào database! 🍭
+        </div>
+        <div th:each="product : ${products}" class="card">
+            <h3 th:text="${product.name}">Tên kẹo</h3>
+            <p th:text="${product.description}">Mô tả</p>
+            <p class="price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</p>
+            <p class="stock" th:text="'Còn: ' + ${product.stock} + ' cái'">Còn: 0 cái</p>
+            <button class="btn">🛒 Thêm vào giỏ</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 CandyShop - Đồ án cuối kỳ Java Web</p>
+    </footer>
+
+    <script>
+        async function searchProducts() {
+            const name = document.getElementById('searchInput').value;
+            if (name.length === 0) {
+                location.reload();
+                return;
+            }
+            const res = await fetch('/api/products/search?name=' + name);
+            const products = await res.json();
+            const container = document.getElementById('productList');
+            if (products.length === 0) {
+                container.innerHTML = '<div class="empty">Không tìm thấy kẹo nào 😢</div>';
+                return;
+            }
+            container.innerHTML = products.map(p => `
+        <div class="card">
+            <h3>${p.name}</h3>
+            <p>${p.description || ''}</p>
+            <p class="price">${p.price?.toLocaleString('vi-VN')} đ</p>
+            <p class="stock">Còn: ${p.stock} cái</p>
+            <button class="btn">🛒 Thêm vào giỏ</button>
+        </div>
+    `).join('');
+        }
+    </script>
+</body>
+
+</html>
