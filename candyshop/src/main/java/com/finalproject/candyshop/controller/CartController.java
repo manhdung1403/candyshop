@@ -63,7 +63,8 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    public ResponseEntity<CartDto> addOrUpdateItem(@RequestBody CartItemRequest request) {
+    public ResponseEntity<CartDto> addItemToCart(@RequestBody CartItemRequest request) {
+        // Adds quantity (default 1) to an existing cart item (or creates new). This is used by "Thêm vào giỏ".
         Cart cart = getOrCreateCart(request.getUserId());
         if (request.getProductId() == null) return ResponseEntity.badRequest().build();
         if (request.getQuantity() == null || request.getQuantity() <= 0) request.setQuantity(1);
@@ -71,9 +72,35 @@ public class CartController {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-        // Try update existing line
         Optional<CartItem> existing = cart.getItems().stream()
                 .filter(i -> i.getProduct().getProductId().equals(product.getProductId()))
+                .findFirst();
+
+        if (existing.isPresent()) {
+            CartItem item = existing.get();
+            int newQty = (item.getQuantity() != null ? item.getQuantity() : 0) + request.getQuantity();
+            item.setQuantity(Math.max(newQty, 1));
+            cartItemRepository.save(item);
+        } else {
+            CartItem item = new CartItem();
+            item.setProduct(product);
+            item.setQuantity(request.getQuantity());
+            cart.addItem(item);
+        }
+
+        cart = cartRepository.save(cart);
+        return ResponseEntity.ok(toDto(cart));
+    }
+
+    @PutMapping("/items")
+    public ResponseEntity<CartDto> setItemQuantity(@RequestBody CartItemRequest request) {
+        // Sets the quantity to a specific value (used from Cart page quantity input).
+        Cart cart = getOrCreateCart(request.getUserId());
+        if (request.getProductId() == null) return ResponseEntity.badRequest().build();
+        if (request.getQuantity() == null || request.getQuantity() <= 0) return ResponseEntity.badRequest().build();
+
+        Optional<CartItem> existing = cart.getItems().stream()
+                .filter(i -> i.getProduct().getProductId().equals(request.getProductId()))
                 .findFirst();
 
         if (existing.isPresent()) {
@@ -81,6 +108,8 @@ public class CartController {
             item.setQuantity(request.getQuantity());
             cartItemRepository.save(item);
         } else {
+            Product product = productRepository.findById(request.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
             CartItem item = new CartItem();
             item.setProduct(product);
             item.setQuantity(request.getQuantity());
