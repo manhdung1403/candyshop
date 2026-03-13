@@ -15,4 +15,7 @@ public class ViewController {
 
     @GetMapping("/home")
     public String homePage() { return "home"; }
+
+    @GetMapping("/cart")
+    public String cartPage() { return "cart"; }
 }

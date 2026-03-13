@@ -236,6 +236,17 @@
             transition: all 0.2s;
         }
         .btn-detail:hover { background: var(--candy-purple); color: #fff; }
+        .btn-add-cart {
+            background: #00c9a7;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 9px 14px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-add-cart:hover { background: #09a38d; }
         .btn-edit {
             background: #fff8e0;
             color: #f5a623;
@@ -482,10 +493,13 @@
         <a class="navbar-brand" href="/home"><span>🍬</span> Candy Shop</a>
         <input type="text" class="nav-search" id="searchInput" placeholder="🔍  Tìm sản phẩm...">
         <div class="ms-auto d-flex gap-2 align-items-center">
-            <span style="color:rgba(255,255,255,0.85);font-weight:700;font-size:0.9rem;">
-                <i class="bi bi-person-circle"></i> Xin chào!
+            <a href="/cart" class="btn-logout" id="cartLink">
+                <i class="bi bi-cart3"></i> Giỏ hàng (<span id="cartCount">0</span>)
+            </a>
+            <span id="userGreeting" style="color:rgba(255,255,255,0.85);font-weight:700;font-size:0.9rem;">
+                <i class="bi bi-person-circle"></i> Khách
             </span>
-            <a href="/login" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+            <a href="#" class="btn-logout" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
         </div>
     </div>
 </nav>
@@ -656,9 +670,12 @@
 
     // ===== INIT =====
     window.onload = async () => {
+        loadUserFromStorage();
+        await updateCartCount();
         await loadCategories();
         await loadProducts();
         document.getElementById('searchInput').addEventListener('input', filterProducts);
+        document.getElementById('logoutBtn').addEventListener('click', logout);
     };
 
     // ===== LOAD CATEGORIES =====
@@ -722,6 +739,9 @@
                         ${formatPrice(p.price)} <small>VNĐ</small>
                     </div>
                     <div class="card-actions" onclick="event.stopPropagation()">
+                        <button class="btn-add-cart" onclick="addToCart(${p.productId});">
+                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                        </button>
                         <button class="btn-detail" onclick="openDetailModal(${p.productId})">
                             <i class="bi bi-eye"></i> Chi tiết
                         </button>
@@ -920,6 +940,67 @@
     function formatPrice(price) {
         return Number(price).toLocaleString('vi-VN');
     }
+    function getCurrentUser() {
+        try {
+            return JSON.parse(localStorage.getItem('candyUser')) || null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function loadUserFromStorage() {
+        const user = getCurrentUser();
+        const greeting = document.getElementById('userGreeting');
+        if (user && greeting) {
+            greeting.innerHTML = `<i class="bi bi-person-circle"></i> ${user.username}`;
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('candyUser');
+        window.location.href = '/login';
+    }
+
+    async function updateCartCount() {
+        const user = getCurrentUser();
+        const countEl = document.getElementById('cartCount');
+        if (!user || !countEl) return;
+        try {
+            const res = await fetch(`/api/cart/count?userId=${user.userId}`);
+            if (res.ok) {
+                const count = await res.json();
+                countEl.textContent = count || 0;
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    async function addToCart(productId, quantity = 1) {
+        const user = getCurrentUser();
+        if (!user) {
+            showToast('Vui lòng đăng nhập để thêm vào giỏ hàng.', 'error');
+            setTimeout(() => window.location.href = '/login', 1200);
+            return;
+        }
+        try {
+            const res = await fetch('/api/cart/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.userId, productId, quantity })
+            });
+            if (!res.ok) {
+                const msg = await res.text();
+                showToast(msg || 'Không thể thêm vào giỏ hàng.', 'error');
+                return;
+            }
+            await updateCartCount();
+            showToast('Đã thêm vào giỏ hàng!', 'success');
+        } catch (e) {
+            showToast('Lỗi hệ thống. Vui lòng thử lại.', 'error');
+        }
+    }
+
     function escapeHtml(str) {
         return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
     }
