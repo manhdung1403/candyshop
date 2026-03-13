@@ -9,7 +9,10 @@ public class ViewController {
 
     @GetMapping("/register")
     public String registerPage() { return "register"; }
-    
+
     @GetMapping("/")
-    public String homePage() { return "home"; } // Tạm thời tạo trang chủ rỗng
+    public String rootPage() { return "redirect:/home"; }
+
+    @GetMapping("/home")
+    public String homePage() { return "home"; }
 }

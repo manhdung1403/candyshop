@@ -78,7 +78,17 @@ CREATE TABLE Cart_Items (
     FOREIGN KEY (cart_id) REFERENCES Carts(cart_id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE
 );
+USE CandyShopDB;
 
+INSERT INTO Categories (category_name) VALUES 
+('Kẹo dẻo'),
+('Kẹo cứng'),
+('Socola'),
+('Bánh quy'),
+('Kẹo mút'),
+('Kẹo cao su'),
+('Snack'),
+('Kẹo trái cây');
 INSERT INTO Roles (role_name) VALUES ('Admin'), ('Staff'), ('Customer');
 
 select * from Users;
