@@ -129,7 +129,16 @@
         <h1>🍬 CandyShop</h1>
         <p>Thiên Đường Kẹo Ngọt - Dự án đồ án cuối kỳ</p>
     </header>
-
+    <div style="position:absolute; top:20px; right:30px; font-size:14px;">
+        <span th:if="${session.loggedUser != null}">
+            Xin chào, <strong th:text="${session.loggedUser.fullName}"></strong>!
+            <a href="/logout" style="color:white; margin-left:10px;">Đăng xuất</a>
+        </span>
+        <span th:if="${session.loggedUser == null}">
+            <a href="/login" style="color:white; margin-right:10px;">Đăng nhập</a>
+            <a href="/register" style="color:white;">Đăng ký</a>
+        </span>
+    </div>
     <div class="search-bar">
         <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm kẹo..." oninput="searchProducts()">
     </div>
