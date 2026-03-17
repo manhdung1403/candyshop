@@ -39,4 +39,14 @@ public class ViewController {
         model.addAttribute("username", username);
         return "profile";
     }
+
+    @GetMapping("/editprofile")
+    public String editProfilePage(HttpSession session, Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("username", username);
+        return "editprofile";
+    }
 };
