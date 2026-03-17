@@ -1,4 +1,5 @@
 package com.finalproject.candyshop.controller;
+
 import com.finalproject.candyshop.dto.*;
 import com.finalproject.candyshop.entity.*;
 import com.finalproject.candyshop.repository.*;
@@ -8,22 +9,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private RoleRepository roleRepository;
-    @Autowired private CartRepository cartRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private CartRepository cartRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) 
+        if (userRepository.existsByUsername(request.getUsername()))
             return ResponseEntity.badRequest().body("Tên đăng nhập đã tồn tại!");
-        if (userRepository.existsByEmail(request.getEmail())) 
+        if (userRepository.existsByEmail(request.getEmail()))
             return ResponseEntity.badRequest().body("Email đã được sử dụng!");
 
         User user = new User();
@@ -46,11 +52,45 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
         if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPasswordHash())) {
+            User user = userOpt.get();
+            session.setAttribute("user", user);
+            session.setAttribute("username", user.getUsername());
             return ResponseEntity.ok("Đăng nhập thành công!");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sai tài khoản hoặc mật khẩu!");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chưa đăng nhập!");
+        }
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpSession session) {
+        session.invalidate();
+        return ResponseEntity.ok("Đã đăng xuất!");
+    }
+
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(@RequestBody UpdateUserRequest request, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chưa đăng nhập!");
+        }
+
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setAddress(request.getAddress());
+
+        User updatedUser = userRepository.save(user);
+        session.setAttribute("user", updatedUser);
+        return ResponseEntity.ok(updatedUser);
     }
 }

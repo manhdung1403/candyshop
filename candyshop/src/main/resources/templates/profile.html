@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ Sơ - Candy Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --candy-pink: #ff4d8d;
+            --candy-purple: #b05cff;
+            --candy-yellow: #ffd600;
+            --candy-mint: #00c9a7;
+            --bg-light: #fff5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: linear-gradient(135deg, #ff4d8d 0%, #b05cff 100%);
+            padding: 14px 32px;
+            box-shadow: 0 4px 20px rgba(255, 77, 141, 0.35);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .navbar-brand {
+            font-family: 'Pacifico', cursive;
+            font-size: 1.9rem;
+            color: #fff !important;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .navbar-brand span {
+            font-size: 1.6rem;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            color: #fff;
+            border-radius: 50px;
+            padding: 7px 20px;
+            font-weight: 700;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.35);
+            color: #fff;
+        }
+
+        /* ===== PROFILE CONTAINER ===== */
+        .profile-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 32px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(255, 77, 141, 0.15);
+            overflow: hidden;
+            border: 2px solid rgba(255, 77, 141, 0.1);
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #ff4d8d 0%, #b05cff 100%);
+            padding: 40px 32px;
+            color: white;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 16px;
+            border: 4px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .profile-role {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        .profile-content {
+            padding: 32px;
+        }
+
+        .profile-field {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 16px;
+        }
+
+        .profile-field:last-child {
+            border-bottom: none;
+        }
+
+        .field-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .field-icon.email {
+            background: linear-gradient(135deg, var(--candy-pink), #ff7ba8);
+        }
+
+        .field-icon.user {
+            background: linear-gradient(135deg, var(--candy-purple), #d896ff);
+        }
+
+        .field-icon.date {
+            background: linear-gradient(135deg, var(--candy-mint), #27dfa6);
+        }
+
+        .field-icon.phone {
+            background: linear-gradient(135deg, #ffd600, #ffed4e);
+        }
+
+        .field-icon.address {
+            background: linear-gradient(135deg, #4d8dff, #85b0ff);
+        }
+
+        .field-icon.status {
+            background: linear-gradient(135deg, #b05cff, #d896ff);
+        }
+
+        .field-info h6 {
+            color: #888;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 4px 0;
+        }
+
+        .field-info p {
+            color: #333;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .profile-actions {
+            padding: 24px 32px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-back {
+            background: #f3e8ff;
+            color: var(--candy-purple);
+        }
+
+        .btn-back:hover {
+            background: var(--candy-purple);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-logout-profile {
+            background: #ffe8e8;
+            color: #ff4d4d;
+        }
+
+        .btn-logout-profile:hover {
+            background: #ff4d4d;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-edit {
+            background: #fffef3;
+            color: var(--candy-yellow);
+        }
+
+        .btn-edit:hover {
+            background: var(--candy-yellow);
+            color: #333;
+            transform: translateY(-2px);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--candy-pink);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-group {
+            margin-bottom: 20px;
+        }
+
+        .modal-group label {
+            display: block;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .modal-group input,
+        .modal-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ffe0ef;
+            border-radius: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .modal-group input:focus,
+        .modal-group textarea:focus {
+            outline: none;
+            border-color: var(--candy-pink);
+            box-shadow: 0 0 0 3px rgba(255, 77, 141, 0.1);
+        }
+
+        .modal-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .modal-btn-save {
+            background: linear-gradient(135deg, var(--candy-pink), #b05cff);
+            color: white;
+        }
+
+        .modal-btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 77, 141, 0.4);
+        }
+
+        .modal-btn-cancel {
+            background: #f3e8ff;
+            color: var(--candy-purple);
+        }
+
+        .modal-btn-cancel:hover {
+            background: var(--candy-purple);
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3e8ff;
+            border-top: 4px solid var(--candy-purple);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar">
+        <div class="d-flex align-items-center w-100 gap-3">
+            <a class="navbar-brand" href="/home"><span>🍬</span> Candy Shop</a>
+            <div class="ms-auto d-flex gap-2 align-items-center">
+                <span id="greetingText" style="color:rgba(255,255,255,0.85);font-weight:700;font-size:0.9rem;">
+                    <i class="bi bi-person-circle"></i> Hồ sơ
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== PROFILE SECTION ===== -->
+    <div class="profile-container">
+        <div id="loadingBox" class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 16px; color: #888;">Đang tải hồ sơ...</p>
+        </div>
+
+        <div id="profileBox" class="profile-card" style="display: none;">
+            <!-- Header -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="bi bi-person"></i>
+                </div>
+                <div class="profile-name" id="userName">Người dùng</div>
+                <div class="profile-role" id="userRole">Customer</div>
+            </div>
+
+            <!-- Content -->
+            <div class="profile-content">
+                <!-- Email -->
+                <div class="profile-field">
+                    <div class="field-icon email">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+                    <div class="field-info">
+                        <h6>Email</h6>
+                        <p id="userEmail">-</p>
+                    </div>
+                </div>
+
+                <!-- Username -->
+                <div class="profile-field">
+                    <div class="field-icon user">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div class="field-info">
+                        <h6>Tên đăng nhập</h6>
+                        <p id="userUsername">-</p>
+                    </div>
+                </div>
+
+                <!-- Ngày tạo -->
+                <div class="profile-field">
+                    <div class="field-icon date">
+                        <i class="bi bi-calendar"></i>
+                    </div>
+                    <div class="field-info">
+                        <h6>Ngày tạo tài khoản</h6>
+                        <p id="userCreatedAt">-</p>
+                    </div>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="profile-field">
+                    <div class="field-icon phone">
+                        <i class="bi bi-telephone"></i>
+                    </div>
+                    <div class="field-info">
+                        <h6>Số điện thoại</h6>
+                        <p id="userPhone">-</p>
+                    </div>
+                </div>
+
+                <!-- Địa chỉ -->
+                <div class="profile-field">
+                    <div class="field-icon address">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <div class="field-info">
+                        <h6>Địa chỉ</h6>
+                        <p id="userAddress">-</p>
+                    </div>
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="profile-field">
+                    <div class="field-icon status">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="field-info">
+                        <h6>Trạng thái tài khoản</h6>
+                        <p id="userStatus">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="profile-actions">
+                <button class="btn-action btn-edit" onclick="openEditModal()">
+                    <i class="bi bi-pencil"></i> Chỉnh sửa
+                </button>
+                <button class="btn-action btn-back" onclick="window.location.href='/home'">
+                    <i class="bi bi-arrow-left"></i> Quay lại
+                </button>
+                <button class="btn-action btn-logout-profile" onclick="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch user info
+        async function loadProfile() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (!res.ok) {
+                    window.location.href = '/login';
+                    return;
+                }
+                const user = await res.json();
+                displayProfile(user);
+            } catch (err) {
+                console.error('Error:', err);
+                window.location.href = '/login';
+            }
+        }
+
+        function displayProfile(user) {
+            document.getElementById('loadingBox').style.display = 'none';
+            document.getElementById('profileBox').style.display = 'block';
+
+            document.getElementById('userName').textContent = user.username;
+            document.getElementById('userEmail').textContent = user.email || '-';
+            document.getElementById('userUsername').textContent = user.username;
+            document.getElementById('userRole').textContent = user.role?.roleName || 'Customer';
+            document.getElementById('userPhone').textContent = user.phone || '-';
+            document.getElementById('userAddress').textContent = user.address || '-';
+            document.getElementById('userStatus').textContent = user.isActive ? '✓ Hoạt động' : '✗ Không hoạt động';
+
+            if (user.createdAt) {
+                const date = new Date(user.createdAt);
+                document.getElementById('userCreatedAt').textContent = date.toLocaleDateString('vi-VN');
+            }
+        }
+
+        function logout() {
+            fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(() => {
+                    window.location.href = '/home';
+                })
+                .catch(err => {
+                    console.error('Logout error:', err);
+                    window.location.href = '/home';
+                });
+        }
+
+        // Load profile on page load
+        window.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+
+</html>

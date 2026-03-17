@@ -25,8 +25,8 @@
                 <div id="messageBox" class="alert d-none"></div>
 
                 <form id="loginForm">
-                    <div class="mb-3"><input type="text" id="username" class="form-control" placeholder="Tên đăng nhập"
-                            required></div>
+                    <div class="mb-3"><input type="email" id="email" class="form-control" placeholder="Email" required>
+                    </div>
                     <div class="mb-3"><input type="password" id="password" class="form-control" placeholder="Mật khẩu"
                             required></div>
                     <button type="submit" class="btn w-100 text-white" style="background-color: #e91e63;">Đăng
@@ -44,7 +44,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username: document.getElementById('username').value,
+                    email: document.getElementById('email').value,
                     password: document.getElementById('password').value
                 })
             });

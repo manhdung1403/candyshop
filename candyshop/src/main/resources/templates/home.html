@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🍬 Candy Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
@@ -18,7 +20,11 @@
             --card-radius: 20px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: 'Nunito', sans-serif;
@@ -35,17 +41,22 @@
             top: 0;
             z-index: 999;
         }
+
         .navbar-brand {
             font-family: 'Pacifico', cursive;
             font-size: 1.9rem;
             color: #fff !important;
             letter-spacing: 1px;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
         }
-        .navbar-brand span { font-size: 1.6rem; }
+
+        .navbar-brand span {
+            font-size: 1.6rem;
+        }
+
         .nav-search {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 50px;
             padding: 8px 20px;
             color: #fff;
@@ -53,18 +64,30 @@
             outline: none;
             transition: all 0.3s;
         }
-        .nav-search::placeholder { color: rgba(255,255,255,0.75); }
-        .nav-search:focus { background: rgba(255,255,255,0.3); border-color: #fff; }
+
+        .nav-search::placeholder {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .nav-search:focus {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #fff;
+        }
+
         .btn-logout {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.6);
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.6);
             color: #fff;
             border-radius: 50px;
             padding: 7px 20px;
             font-weight: 700;
             transition: all 0.3s;
         }
-        .btn-logout:hover { background: rgba(255,255,255,0.35); color: #fff; }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.35);
+            color: #fff;
+        }
 
         /* ===== FILTER BAR ===== */
         .filter-bar {
@@ -76,7 +99,13 @@
             gap: 12px;
             flex-wrap: wrap;
         }
-        .filter-label { font-weight: 800; color: #b05cff; font-size: 0.95rem; }
+
+        .filter-label {
+            font-weight: 800;
+            color: #b05cff;
+            font-size: 0.95rem;
+        }
+
         .filter-btn {
             border: 2px solid #ffd6e9;
             background: #fff;
@@ -88,11 +117,14 @@
             cursor: pointer;
             transition: all 0.25s;
         }
-        .filter-btn:hover, .filter-btn.active {
+
+        .filter-btn:hover,
+        .filter-btn.active {
             background: var(--candy-pink);
             border-color: var(--candy-pink);
             color: #fff;
         }
+
         .btn-add-product {
             margin-left: auto;
             background: linear-gradient(135deg, #ff4d8d, #b05cff);
@@ -109,6 +141,7 @@
             align-items: center;
             gap: 8px;
         }
+
         .btn-add-product:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 22px rgba(255, 77, 141, 0.5);
@@ -118,6 +151,7 @@
         .products-section {
             padding: 32px;
         }
+
         .section-title {
             font-family: 'Pacifico', cursive;
             font-size: 1.5rem;
@@ -127,6 +161,7 @@
             align-items: center;
             gap: 10px;
         }
+
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -139,31 +174,36 @@
             border-radius: var(--card-radius);
             overflow: hidden;
             box-shadow: 0 4px 16px rgba(176, 92, 255, 0.1);
-            transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+            transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
             position: relative;
             border: 2px solid transparent;
             cursor: pointer;
         }
+
         .product-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 12px 32px rgba(255, 77, 141, 0.2);
             border-color: var(--candy-pink);
         }
+
         .card-image-wrap {
             height: 200px;
             overflow: hidden;
             position: relative;
             background: linear-gradient(135deg, #fff5f9, #f3e8ff);
         }
+
         .card-image-wrap img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.4s;
         }
+
         .product-card:hover .card-image-wrap img {
             transform: scale(1.06);
         }
+
         .card-badge {
             position: absolute;
             top: 12px;
@@ -177,6 +217,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .card-stock-badge {
             position: absolute;
             top: 12px;
@@ -186,11 +227,21 @@
             padding: 4px 12px;
             border-radius: 50px;
         }
-        .in-stock { background: #e8fff5; color: var(--candy-mint); }
-        .out-stock { background: #ffe8e8; color: #ff4d4d; }
+
+        .in-stock {
+            background: #e8fff5;
+            color: var(--candy-mint);
+        }
+
+        .out-stock {
+            background: #ffe8e8;
+            color: #ff4d4d;
+        }
+
         .card-body {
             padding: 18px;
         }
+
         .card-name {
             font-size: 1rem;
             font-weight: 800;
@@ -200,6 +251,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .card-category {
             font-size: 0.8rem;
             color: #aaa;
@@ -208,21 +260,25 @@
             align-items: center;
             gap: 4px;
         }
+
         .card-price {
             font-size: 1.3rem;
             font-weight: 800;
             color: var(--candy-pink);
             margin-bottom: 14px;
         }
+
         .card-price small {
             font-size: 0.75rem;
             color: #bbb;
             font-weight: 600;
         }
+
         .card-actions {
             display: flex;
             gap: 8px;
         }
+
         .btn-detail {
             flex: 1;
             background: #f3e8ff;
@@ -235,7 +291,12 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-detail:hover { background: var(--candy-purple); color: #fff; }
+
+        .btn-detail:hover {
+            background: var(--candy-purple);
+            color: #fff;
+        }
+
         .btn-edit {
             background: #fff8e0;
             color: #f5a623;
@@ -246,7 +307,12 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-edit:hover { background: #f5a623; color: #fff; }
+
+        .btn-edit:hover {
+            background: #f5a623;
+            color: #fff;
+        }
+
         .btn-delete {
             background: #ffe8e8;
             color: #ff4d4d;
@@ -257,7 +323,11 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-delete:hover { background: #ff4d4d; color: #fff; }
+
+        .btn-delete:hover {
+            background: #ff4d4d;
+            color: #fff;
+        }
 
         /* ===== EMPTY STATE ===== */
         .empty-state {
@@ -265,8 +335,17 @@
             padding: 80px 20px;
             grid-column: 1 / -1;
         }
-        .empty-state .emoji { font-size: 5rem; display: block; margin-bottom: 16px; }
-        .empty-state h4 { color: #bbb; font-weight: 700; }
+
+        .empty-state .emoji {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h4 {
+            color: #bbb;
+            font-weight: 700;
+        }
 
         /* ===== MODAL SHARED ===== */
         .modal-content {
@@ -274,20 +353,35 @@
             border: none;
             overflow: hidden;
         }
+
         .modal-header {
             background: linear-gradient(135deg, #ff4d8d, #b05cff);
             padding: 20px 28px;
             border: none;
         }
+
         .modal-title {
             font-family: 'Pacifico', cursive;
             color: #fff;
             font-size: 1.3rem;
         }
-        .btn-close { filter: invert(1); }
-        .modal-body { padding: 28px; }
-        .form-label { font-weight: 700; color: #555; margin-bottom: 6px; }
-        .form-control, .form-select {
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-body {
+            padding: 28px;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .form-control,
+        .form-select {
             border: 2px solid #ffe0ef;
             border-radius: 14px;
             padding: 10px 16px;
@@ -295,9 +389,11 @@
             font-weight: 600;
             transition: all 0.2s;
         }
-        .form-control:focus, .form-select:focus {
+
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--candy-pink);
-            box-shadow: 0 0 0 3px rgba(255,77,141,0.15);
+            box-shadow: 0 0 0 3px rgba(255, 77, 141, 0.15);
         }
 
         /* ===== IMAGE UPLOAD AREA ===== */
@@ -311,10 +407,13 @@
             position: relative;
             background: #fff5f9;
         }
-        .image-upload-zone:hover, .image-upload-zone.dragging {
+
+        .image-upload-zone:hover,
+        .image-upload-zone.dragging {
             border-color: var(--candy-pink);
             background: #ffe8f3;
         }
+
         .image-upload-zone input[type="file"] {
             position: absolute;
             inset: 0;
@@ -323,6 +422,7 @@
             width: 100%;
             height: 100%;
         }
+
         .upload-preview {
             width: 100%;
             max-height: 180px;
@@ -330,8 +430,18 @@
             border-radius: 12px;
             margin-bottom: 10px;
         }
-        .upload-icon { font-size: 2.5rem; color: var(--candy-pink); }
-        .upload-text { font-weight: 700; color: #aaa; font-size: 0.88rem; margin-top: 8px; }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--candy-pink);
+        }
+
+        .upload-text {
+            font-weight: 700;
+            color: #aaa;
+            font-size: 0.88rem;
+            margin-top: 8px;
+        }
 
         /* ===== SUBMIT BUTTON ===== */
         .btn-submit {
@@ -347,6 +457,7 @@
             transition: all 0.3s;
             box-shadow: 0 4px 16px rgba(255, 77, 141, 0.35);
         }
+
         .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(255, 77, 141, 0.45);
@@ -360,21 +471,56 @@
             border-radius: 18px;
             margin-bottom: 20px;
         }
+
         .detail-row {
             display: flex;
             justify-content: space-between;
             padding: 12px 0;
             border-bottom: 1px dashed #ffe0ef;
         }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-key { font-weight: 700; color: #aaa; }
-        .detail-val { font-weight: 800; color: #333; }
-        .detail-price { font-size: 1.6rem; font-weight: 800; color: var(--candy-pink); }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-key {
+            font-weight: 700;
+            color: #aaa;
+        }
+
+        .detail-val {
+            font-weight: 800;
+            color: #333;
+        }
+
+        .detail-price {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--candy-pink);
+        }
 
         /* ===== DELETE MODAL ===== */
-        .delete-icon { font-size: 5rem; text-align: center; display: block; margin: 10px auto; }
-        .delete-title { font-family: 'Pacifico', cursive; color: #ff4d4d; font-size: 1.3rem; text-align: center; }
-        .delete-msg { text-align: center; color: #888; font-weight: 600; margin: 10px 0 24px; }
+        .delete-icon {
+            font-size: 5rem;
+            text-align: center;
+            display: block;
+            margin: 10px auto;
+        }
+
+        .delete-title {
+            font-family: 'Pacifico', cursive;
+            color: #ff4d4d;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .delete-msg {
+            text-align: center;
+            color: #888;
+            font-weight: 600;
+            margin: 10px 0 24px;
+        }
+
         .btn-confirm-delete {
             background: #ff4d4d;
             color: #fff;
@@ -387,7 +533,11 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .btn-confirm-delete:hover { background: #e63939; }
+
+        .btn-confirm-delete:hover {
+            background: #e63939;
+        }
+
         .btn-cancel {
             background: #f0f0f0;
             color: #888;
@@ -401,25 +551,48 @@
             margin-top: 8px;
             transition: all 0.3s;
         }
-        .btn-cancel:hover { background: #e0e0e0; }
+
+        .btn-cancel:hover {
+            background: #e0e0e0;
+        }
 
         /* ===== TOAST ===== */
-        .toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 9999; }
+        .toast-container {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
+        }
+
         .toast-msg {
             background: #fff;
             border-left: 5px solid var(--candy-pink);
             border-radius: 14px;
             padding: 16px 22px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
             font-weight: 700;
             color: #333;
             animation: toastIn 0.4s ease;
         }
-        .toast-msg.success { border-color: var(--candy-mint); }
-        .toast-msg.error { border-color: #ff4d4d; }
+
+        .toast-msg.success {
+            border-color: var(--candy-mint);
+        }
+
+        .toast-msg.error {
+            border-color: #ff4d4d;
+        }
+
         @keyframes toastIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ===== LOADING ===== */
@@ -428,6 +601,7 @@
             text-align: center;
             padding: 60px;
         }
+
         .spinner-candy {
             width: 50px;
             height: 50px;
@@ -437,7 +611,12 @@
             animation: spin 0.8s linear infinite;
             margin: 0 auto;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* ===== STATS BAR ===== */
         .stats-bar {
@@ -446,6 +625,7 @@
             padding: 0 32px 28px;
             flex-wrap: wrap;
         }
+
         .stat-chip {
             background: #fff;
             border-radius: 14px;
@@ -457,6 +637,7 @@
             flex: 1;
             min-width: 140px;
         }
+
         .stat-icon {
             width: 42px;
             height: 42px;
@@ -466,244 +647,308 @@
             justify-content: center;
             font-size: 1.2rem;
         }
-        .stat-icon.pink { background: #ffe8f3; color: var(--candy-pink); }
-        .stat-icon.purple { background: #f3e8ff; color: var(--candy-purple); }
-        .stat-icon.mint { background: #e8fff8; color: var(--candy-mint); }
-        .stat-icon.yellow { background: #fff8e0; color: #f5a623; }
-        .stat-num { font-size: 1.4rem; font-weight: 800; color: #333; line-height: 1; }
-        .stat-label { font-size: 0.78rem; color: #aaa; font-weight: 700; }
+
+        .stat-icon.pink {
+            background: #ffe8f3;
+            color: var(--candy-pink);
+        }
+
+        .stat-icon.purple {
+            background: #f3e8ff;
+            color: var(--candy-purple);
+        }
+
+        .stat-icon.mint {
+            background: #e8fff8;
+            color: var(--candy-mint);
+        }
+
+        .stat-icon.yellow {
+            background: #fff8e0;
+            color: #f5a623;
+        }
+
+        .stat-num {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #333;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: #aaa;
+            font-weight: 700;
+        }
     </style>
 </head>
+
 <body>
 
-<!-- ===== NAVBAR ===== -->
-<nav class="navbar">
-    <div class="d-flex align-items-center w-100 gap-3">
-        <a class="navbar-brand" href="/home"><span>🍬</span> Candy Shop</a>
-        <input type="text" class="nav-search" id="searchInput" placeholder="🔍  Tìm sản phẩm...">
-        <div class="ms-auto d-flex gap-2 align-items-center">
-            <span style="color:rgba(255,255,255,0.85);font-weight:700;font-size:0.9rem;">
-                <i class="bi bi-person-circle"></i> Xin chào!
-            </span>
-            <a href="/login" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar">
+        <div class="d-flex align-items-center w-100 gap-3">
+            <a class="navbar-brand" href="/home"><span>🍬</span> Candy Shop</a>
+            <input type="text" class="nav-search" id="searchInput" placeholder="🔍  Tìm sản phẩm...">
+            <div class="ms-auto d-flex gap-2 align-items-center">
+                <!-- Nếu đã đăng nhập -->
+                <div th:if="${isLoggedIn}" style="display: flex; gap: 12px; align-items: center;">
+                    <a href="/profile"
+                        style="color:rgba(255,255,255,0.85);font-weight:700;font-size:0.9rem; text-decoration: none; cursor: pointer;">
+                        <i class="bi bi-person-circle"></i> Xin chào, <span th:text="${username}"></span>!
+                    </a>
+                    <button onclick="logout()" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Đăng
+                        xuất</button>
+                </div>
+                <!-- Nếu chưa đăng nhập -->
+                <div th:unless="${isLoggedIn}" style="display: flex; gap: 12px; align-items: center;">
+                    <a href="/login" class="btn-logout" style="text-decoration: none;">
+                        <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                    </a>
+                    <a href="/register" class="btn-logout"
+                        style="background: rgba(255,255,255,0.3); text-decoration: none;">
+                        <i class="bi bi-person-plus"></i> Đăng ký
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== FILTER BAR ===== -->
+    <div class="filter-bar">
+        <span class="filter-label"><i class="bi bi-funnel-fill"></i> Lọc:</span>
+        <button class="filter-btn active" data-id="">🍭 Tất cả</button>
+        <div id="categoryFilters"></div>
+        <button class="btn-add-product" onclick="openAddModal()">
+            <i class="bi bi-plus-lg"></i> Thêm Sản Phẩm
+        </button>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats-bar mt-3" id="statsBar">
+        <div class="stat-chip">
+            <div class="stat-icon pink"><i class="bi bi-box-seam"></i></div>
+            <div>
+                <div class="stat-num" id="statTotal">0</div>
+                <div class="stat-label">Sản phẩm</div>
+            </div>
+        </div>
+        <div class="stat-chip">
+            <div class="stat-icon purple"><i class="bi bi-tag"></i></div>
+            <div>
+                <div class="stat-num" id="statCategories">0</div>
+                <div class="stat-label">Danh mục</div>
+            </div>
+        </div>
+        <div class="stat-chip">
+            <div class="stat-icon mint"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="stat-num" id="statInStock">0</div>
+                <div class="stat-label">Còn hàng</div>
+            </div>
+        </div>
+        <div class="stat-chip">
+            <div class="stat-icon yellow"><i class="bi bi-exclamation-circle"></i></div>
+            <div>
+                <div class="stat-num" id="statOutStock">0</div>
+                <div class="stat-label">Hết hàng</div>
+            </div>
         </div>
     </div>
-</nav>
 
-<!-- ===== FILTER BAR ===== -->
-<div class="filter-bar">
-    <span class="filter-label"><i class="bi bi-funnel-fill"></i> Lọc:</span>
-    <button class="filter-btn active" data-id="">🍭 Tất cả</button>
-    <div id="categoryFilters"></div>
-    <button class="btn-add-product" onclick="openAddModal()">
-        <i class="bi bi-plus-lg"></i> Thêm Sản Phẩm
-    </button>
-</div>
-
-<!-- ===== STATS ===== -->
-<div class="stats-bar mt-3" id="statsBar">
-    <div class="stat-chip">
-        <div class="stat-icon pink"><i class="bi bi-box-seam"></i></div>
-        <div><div class="stat-num" id="statTotal">0</div><div class="stat-label">Sản phẩm</div></div>
-    </div>
-    <div class="stat-chip">
-        <div class="stat-icon purple"><i class="bi bi-tag"></i></div>
-        <div><div class="stat-num" id="statCategories">0</div><div class="stat-label">Danh mục</div></div>
-    </div>
-    <div class="stat-chip">
-        <div class="stat-icon mint"><i class="bi bi-check-circle"></i></div>
-        <div><div class="stat-num" id="statInStock">0</div><div class="stat-label">Còn hàng</div></div>
-    </div>
-    <div class="stat-chip">
-        <div class="stat-icon yellow"><i class="bi bi-exclamation-circle"></i></div>
-        <div><div class="stat-num" id="statOutStock">0</div><div class="stat-label">Hết hàng</div></div>
-    </div>
-</div>
-
-<!-- ===== PRODUCT GRID ===== -->
-<div class="products-section">
-    <div class="section-title">🍫 Danh Sách Sản Phẩm</div>
-    <div class="product-grid" id="productGrid">
-        <div class="spinner-wrap"><div class="spinner-candy"></div></div>
-    </div>
-</div>
-
-<!-- ===== MODAL: ADD/EDIT ===== -->
-<div class="modal fade" id="productModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">🍬 Thêm Sản Phẩm</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- ===== PRODUCT GRID ===== -->
+    <div class="products-section">
+        <div class="section-title">🍫 Danh Sách Sản Phẩm</div>
+        <div class="product-grid" id="productGrid">
+            <div class="spinner-wrap">
+                <div class="spinner-candy"></div>
             </div>
-            <div class="modal-body">
-                <input type="hidden" id="editProductId">
-                <div class="row g-3">
-                    <!-- Image Upload -->
-                    <div class="col-12">
-                        <label class="form-label"><i class="bi bi-image"></i> Hình ảnh sản phẩm</label>
-                        <div class="image-upload-zone" id="uploadZone">
-                            <input type="file" id="productImage" accept="image/*" onchange="previewImage(this)">
-                            <img id="imagePreview" class="upload-preview d-none" src="" alt="preview">
-                            <div id="uploadPlaceholder">
-                                <div class="upload-icon">📷</div>
-                                <div class="upload-text">Kéo thả hoặc click để chọn ảnh<br><small>PNG, JPG, WEBP (tối đa 5MB)</small></div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: ADD/EDIT ===== -->
+    <div class="modal fade" id="productModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">🍬 Thêm Sản Phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editProductId">
+                    <div class="row g-3">
+                        <!-- Image Upload -->
+                        <div class="col-12">
+                            <label class="form-label"><i class="bi bi-image"></i> Hình ảnh sản phẩm</label>
+                            <div class="image-upload-zone" id="uploadZone">
+                                <input type="file" id="productImage" accept="image/*" onchange="previewImage(this)">
+                                <img id="imagePreview" class="upload-preview d-none" src="" alt="preview">
+                                <div id="uploadPlaceholder">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">Kéo thả hoặc click để chọn ảnh<br><small>PNG, JPG, WEBP
+                                            (tối đa 5MB)</small></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Name -->
-                    <div class="col-12">
-                        <label class="form-label"><i class="bi bi-candy"></i> Tên sản phẩm <span style="color:red">*</span></label>
-                        <input type="text" class="form-control" id="productName" placeholder="VD: Kẹo dẻo hương dâu..." required>
-                    </div>
-                    <!-- Category + Price -->
-                    <div class="col-6">
-                        <label class="form-label"><i class="bi bi-tag"></i> Danh mục</label>
-                        <select class="form-select" id="productCategory">
-                            <option value="">-- Chọn danh mục --</option>
-                        </select>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label"><i class="bi bi-currency-dollar"></i> Giá (VNĐ) <span style="color:red">*</span></label>
-                        <input type="number" class="form-control" id="productPrice" placeholder="0" min="0" required>
-                    </div>
-                    <!-- Stock + Expiry -->
-                    <div class="col-6">
-                        <label class="form-label"><i class="bi bi-boxes"></i> Số lượng kho</label>
-                        <input type="number" class="form-control" id="productStock" placeholder="0" min="0" value="0">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label"><i class="bi bi-calendar"></i> Hạn sử dụng</label>
-                        <input type="date" class="form-control" id="productExpiry">
-                    </div>
-                    <!-- Submit -->
-                    <div class="col-12 mt-2">
-                        <button class="btn-submit" onclick="submitProduct()">
-                            <i class="bi bi-check-lg"></i> <span id="submitText">Thêm Sản Phẩm</span>
-                        </button>
+                        <!-- Name -->
+                        <div class="col-12">
+                            <label class="form-label"><i class="bi bi-candy"></i> Tên sản phẩm <span
+                                    style="color:red">*</span></label>
+                            <input type="text" class="form-control" id="productName"
+                                placeholder="VD: Kẹo dẻo hương dâu..." required>
+                        </div>
+                        <!-- Category + Price -->
+                        <div class="col-6">
+                            <label class="form-label"><i class="bi bi-tag"></i> Danh mục</label>
+                            <select class="form-select" id="productCategory">
+                                <option value="">-- Chọn danh mục --</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label"><i class="bi bi-currency-dollar"></i> Giá (VNĐ) <span
+                                    style="color:red">*</span></label>
+                            <input type="number" class="form-control" id="productPrice" placeholder="0" min="0"
+                                required>
+                        </div>
+                        <!-- Stock + Expiry -->
+                        <div class="col-6">
+                            <label class="form-label"><i class="bi bi-boxes"></i> Số lượng kho</label>
+                            <input type="number" class="form-control" id="productStock" placeholder="0" min="0"
+                                value="0">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label"><i class="bi bi-calendar"></i> Hạn sử dụng</label>
+                            <input type="date" class="form-control" id="productExpiry">
+                        </div>
+                        <!-- Submit -->
+                        <div class="col-12 mt-2">
+                            <button class="btn-submit" onclick="submitProduct()">
+                                <i class="bi bi-check-lg"></i> <span id="submitText">Thêm Sản Phẩm</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ===== MODAL: DETAIL ===== -->
-<div class="modal fade" id="detailModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">🔍 Chi Tiết Sản Phẩm</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- ===== MODAL: DETAIL ===== -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">🔍 Chi Tiết Sản Phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <img id="detailImg" src="" alt="" class="detail-img">
+                    <div class="detail-row">
+                        <span class="detail-key">Tên sản phẩm</span>
+                        <span class="detail-val" id="detailName"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-key">Danh mục</span>
+                        <span class="detail-val" id="detailCategory"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-key">Giá bán</span>
+                        <span class="detail-price" id="detailPrice"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-key">Kho hàng</span>
+                        <span class="detail-val" id="detailStock"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-key">Hạn sử dụng</span>
+                        <span class="detail-val" id="detailExpiry"></span>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body">
-                <img id="detailImg" src="" alt="" class="detail-img">
-                <div class="detail-row">
-                    <span class="detail-key">Tên sản phẩm</span>
-                    <span class="detail-val" id="detailName"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-key">Danh mục</span>
-                    <span class="detail-val" id="detailCategory"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-key">Giá bán</span>
-                    <span class="detail-price" id="detailPrice"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-key">Kho hàng</span>
-                    <span class="detail-val" id="detailStock"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-key">Hạn sử dụng</span>
-                    <span class="detail-val" id="detailExpiry"></span>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: DELETE ===== -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body p-4">
+                    <span class="delete-icon">🗑️</span>
+                    <div class="delete-title">Xóa sản phẩm?</div>
+                    <p class="delete-msg">Bạn có chắc muốn xóa <strong id="deleteProductName"></strong>? Thao tác này
+                        không thể hoàn tác!</p>
+                    <button class="btn-confirm-delete" onclick="confirmDelete()">
+                        <i class="bi bi-trash"></i> Xác nhận xóa
+                    </button>
+                    <button class="btn-cancel" data-bs-dismiss="modal">Hủy bỏ</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ===== MODAL: DELETE ===== -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-body p-4">
-                <span class="delete-icon">🗑️</span>
-                <div class="delete-title">Xóa sản phẩm?</div>
-                <p class="delete-msg">Bạn có chắc muốn xóa <strong id="deleteProductName"></strong>? Thao tác này không thể hoàn tác!</p>
-                <button class="btn-confirm-delete" onclick="confirmDelete()">
-                    <i class="bi bi-trash"></i> Xác nhận xóa
-                </button>
-                <button class="btn-cancel" data-bs-dismiss="modal">Hủy bỏ</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div class="toast-container" id="toastContainer"></div>
 
-<!-- ===== TOAST CONTAINER ===== -->
-<div class="toast-container" id="toastContainer"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allProducts = [];
+        let categories = [];
+        let deleteTargetId = null;
+        let activeCategory = '';
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    let allProducts = [];
-    let categories = [];
-    let deleteTargetId = null;
-    let activeCategory = '';
+        const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-    const productModal = new bootstrap.Modal(document.getElementById('productModal'));
-    const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        // ===== INIT =====
+        window.onload = async () => {
+            await loadCategories();
+            await loadProducts();
+            document.getElementById('searchInput').addEventListener('input', filterProducts);
+        };
 
-    // ===== INIT =====
-    window.onload = async () => {
-        await loadCategories();
-        await loadProducts();
-        document.getElementById('searchInput').addEventListener('input', filterProducts);
-    };
+        // ===== LOAD CATEGORIES =====
+        async function loadCategories() {
+            const res = await fetch('/api/products/categories');
+            categories = await res.json();
+            const catFilters = document.getElementById('categoryFilters');
+            const catSelect = document.getElementById('productCategory');
+            catFilters.innerHTML = '';
+            catSelect.innerHTML = '<option value="">-- Chọn danh mục --</option>';
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.textContent = '🏷️ ' + cat.categoryName;
+                btn.dataset.id = cat.categoryId;
+                btn.onclick = () => setCategory(cat.categoryId, btn);
+                catFilters.appendChild(btn);
+                catSelect.innerHTML += `<option value="${cat.categoryId}">${cat.categoryName}</option>`;
+            });
+            document.getElementById('statCategories').textContent = categories.length;
+        }
 
-    // ===== LOAD CATEGORIES =====
-    async function loadCategories() {
-        const res = await fetch('/api/products/categories');
-        categories = await res.json();
-        const catFilters = document.getElementById('categoryFilters');
-        const catSelect = document.getElementById('productCategory');
-        catFilters.innerHTML = '';
-        catSelect.innerHTML = '<option value="">-- Chọn danh mục --</option>';
-        categories.forEach(cat => {
-            const btn = document.createElement('button');
-            btn.className = 'filter-btn';
-            btn.textContent = '🏷️ ' + cat.categoryName;
-            btn.dataset.id = cat.categoryId;
-            btn.onclick = () => setCategory(cat.categoryId, btn);
-            catFilters.appendChild(btn);
-            catSelect.innerHTML += `<option value="${cat.categoryId}">${cat.categoryName}</option>`;
-        });
-        document.getElementById('statCategories').textContent = categories.length;
-    }
+        // ===== LOAD PRODUCTS =====
+        async function loadProducts(categoryId = '') {
+            document.getElementById('productGrid').innerHTML = '<div class="spinner-wrap"><div class="spinner-candy"></div></div>';
+            let url = '/api/products';
+            if (categoryId) url += '?categoryId=' + categoryId;
+            const res = await fetch(url);
+            allProducts = await res.json();
+            renderProducts(allProducts);
+            updateStats();
+        }
 
-    // ===== LOAD PRODUCTS =====
-    async function loadProducts(categoryId = '') {
-        document.getElementById('productGrid').innerHTML = '<div class="spinner-wrap"><div class="spinner-candy"></div></div>';
-        let url = '/api/products';
-        if (categoryId) url += '?categoryId=' + categoryId;
-        const res = await fetch(url);
-        allProducts = await res.json();
-        renderProducts(allProducts);
-        updateStats();
-    }
-
-    // ===== RENDER PRODUCTS =====
-    function renderProducts(products) {
-        const grid = document.getElementById('productGrid');
-        if (products.length === 0) {
-            grid.innerHTML = `<div class="empty-state">
+        // ===== RENDER PRODUCTS =====
+        function renderProducts(products) {
+            const grid = document.getElementById('productGrid');
+            if (products.length === 0) {
+                grid.innerHTML = `<div class="empty-state">
                 <span class="emoji">🍬</span>
                 <h4>Chưa có sản phẩm nào!</h4>
                 <p style="color:#ccc;margin-top:8px;">Hãy thêm sản phẩm đầu tiên của bạn.</p>
             </div>`;
-            return;
-        }
-        grid.innerHTML = products.map(p => `
+                return;
+            }
+            grid.innerHTML = products.map(p => `
             <div class="product-card" onclick="openDetailModal(${p.productId})">
                 <div class="card-image-wrap">
                     <img src="${getImageUrl(p.imageUrl)}" alt="${p.nameProduct}" onerror="imgError(this)">
@@ -735,202 +980,218 @@
                 </div>
             </div>
         `).join('');
-    }
+        }
 
-    // ===== STATS =====
-    function updateStats() {
-        document.getElementById('statTotal').textContent = allProducts.length;
-        document.getElementById('statInStock').textContent = allProducts.filter(p => p.stockQuantity > 0).length;
-        document.getElementById('statOutStock').textContent = allProducts.filter(p => p.stockQuantity === 0).length;
-    }
+        // ===== STATS =====
+        function updateStats() {
+            document.getElementById('statTotal').textContent = allProducts.length;
+            document.getElementById('statInStock').textContent = allProducts.filter(p => p.stockQuantity > 0).length;
+            document.getElementById('statOutStock').textContent = allProducts.filter(p => p.stockQuantity === 0).length;
+        }
 
-    // ===== FILTER =====
-    function setCategory(id, btn) {
-        activeCategory = id;
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        loadProducts(id);
-    }
-    document.querySelector('[data-id=""]').onclick = () => {
-        activeCategory = '';
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector('[data-id=""]').classList.add('active');
-        loadProducts();
-    };
-    function filterProducts() {
-        const kw = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = allProducts.filter(p => p.nameProduct.toLowerCase().includes(kw));
-        renderProducts(filtered);
-    }
+        // ===== FILTER =====
+        function setCategory(id, btn) {
+            activeCategory = id;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadProducts(id);
+        }
+        document.querySelector('[data-id=""]').onclick = () => {
+            activeCategory = '';
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-id=""]').classList.add('active');
+            loadProducts();
+        };
+        function filterProducts() {
+            const kw = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => p.nameProduct.toLowerCase().includes(kw));
+            renderProducts(filtered);
+        }
 
-    // ===== OPEN ADD MODAL =====
-    function openAddModal() {
-        document.getElementById('modalTitle').textContent = '🍬 Thêm Sản Phẩm';
-        document.getElementById('submitText').textContent = 'Thêm Sản Phẩm';
-        document.getElementById('editProductId').value = '';
-        document.getElementById('productName').value = '';
-        document.getElementById('productPrice').value = '';
-        document.getElementById('productStock').value = '0';
-        document.getElementById('productExpiry').value = '';
-        document.getElementById('productCategory').value = '';
-        resetImagePreview();
-        productModal.show();
-    }
-
-    // ===== OPEN EDIT MODAL =====
-    function openEditModal(id) {
-        const p = allProducts.find(x => x.productId === id);
-        if (!p) return;
-        document.getElementById('modalTitle').textContent = '✏️ Sửa Sản Phẩm';
-        document.getElementById('submitText').textContent = 'Cập Nhật';
-        document.getElementById('editProductId').value = p.productId;
-        document.getElementById('productName').value = p.nameProduct;
-        document.getElementById('productPrice').value = p.price;
-        document.getElementById('productStock').value = p.stockQuantity;
-        document.getElementById('productExpiry').value = p.expiryDate || '';
-        document.getElementById('productCategory').value = p.category?.categoryId || '';
-        // Show existing image
-        if (p.imageUrl && p.imageUrl !== 'default_candy.png') {
-            document.getElementById('imagePreview').src = getImageUrl(p.imageUrl);
-            document.getElementById('imagePreview').classList.remove('d-none');
-            document.getElementById('uploadPlaceholder').classList.add('d-none');
-        } else {
+        // ===== OPEN ADD MODAL =====
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = '🍬 Thêm Sản Phẩm';
+            document.getElementById('submitText').textContent = 'Thêm Sản Phẩm';
+            document.getElementById('editProductId').value = '';
+            document.getElementById('productName').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productStock').value = '0';
+            document.getElementById('productExpiry').value = '';
+            document.getElementById('productCategory').value = '';
             resetImagePreview();
+            productModal.show();
         }
-        productModal.show();
-    }
 
-    // ===== OPEN DETAIL MODAL =====
-    function openDetailModal(id) {
-        const p = allProducts.find(x => x.productId === id);
-        if (!p) return;
-        document.getElementById('detailImg').src = getImageUrl(p.imageUrl);
-        document.getElementById('detailImg').onerror = function() { imgError(this); };
-        document.getElementById('detailName').textContent = p.nameProduct;
-        document.getElementById('detailCategory').textContent = p.category?.categoryName || 'Chưa phân loại';
-        document.getElementById('detailPrice').textContent = formatPrice(p.price) + ' VNĐ';
-        document.getElementById('detailStock').textContent = p.stockQuantity + ' sản phẩm';
-        document.getElementById('detailExpiry').textContent = p.expiryDate || 'Không có';
-        detailModal.show();
-    }
-
-    // ===== OPEN DELETE MODAL =====
-    function openDeleteModal(id, name) {
-        deleteTargetId = id;
-        document.getElementById('deleteProductName').textContent = name;
-        deleteModal.show();
-    }
-
-    // ===== SUBMIT PRODUCT (ADD / EDIT) =====
-    async function submitProduct() {
-        const name = document.getElementById('productName').value.trim();
-        const price = document.getElementById('productPrice').value;
-        if (!name || !price) { showToast('Vui lòng điền tên và giá sản phẩm!', 'error'); return; }
-
-        const id = document.getElementById('editProductId').value;
-        const formData = new FormData();
-        formData.append('nameProduct', name);
-        formData.append('price', price);
-        formData.append('stockQuantity', document.getElementById('productStock').value || 0);
-        const category = document.getElementById('productCategory').value;
-        if (category) formData.append('categoryId', category);
-        const expiry = document.getElementById('productExpiry').value;
-        if (expiry) formData.append('expiryDate', expiry);
-        const imageFile = document.getElementById('productImage').files[0];
-        if (imageFile) formData.append('imageFile', imageFile);
-
-        const url = id ? `/api/products/${id}` : '/api/products';
-        const method = id ? 'PUT' : 'POST';
-
-        const res = await fetch(url, { method, body: formData });
-        if (res.ok) {
-            productModal.hide();
-            showToast(id ? '✅ Cập nhật thành công!' : '✅ Thêm sản phẩm thành công!', 'success');
-            await loadProducts(activeCategory);
-        } else {
-            const msg = await res.text();
-            showToast('❌ Lỗi: ' + msg, 'error');
-        }
-    }
-
-    // ===== CONFIRM DELETE =====
-    async function confirmDelete() {
-        if (!deleteTargetId) return;
-        const res = await fetch(`/api/products/${deleteTargetId}`, { method: 'DELETE' });
-        if (res.ok) {
-            deleteModal.hide();
-            showToast('🗑️ Đã xóa sản phẩm!', 'success');
-            await loadProducts(activeCategory);
-        } else {
-            showToast('❌ Không thể xóa sản phẩm!', 'error');
-        }
-        deleteTargetId = null;
-    }
-
-    // ===== IMAGE PREVIEW =====
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('imagePreview').src = e.target.result;
+        // ===== OPEN EDIT MODAL =====
+        function openEditModal(id) {
+            const p = allProducts.find(x => x.productId === id);
+            if (!p) return;
+            document.getElementById('modalTitle').textContent = '✏️ Sửa Sản Phẩm';
+            document.getElementById('submitText').textContent = 'Cập Nhật';
+            document.getElementById('editProductId').value = p.productId;
+            document.getElementById('productName').value = p.nameProduct;
+            document.getElementById('productPrice').value = p.price;
+            document.getElementById('productStock').value = p.stockQuantity;
+            document.getElementById('productExpiry').value = p.expiryDate || '';
+            document.getElementById('productCategory').value = p.category?.categoryId || '';
+            // Show existing image
+            if (p.imageUrl && p.imageUrl !== 'default_candy.png') {
+                document.getElementById('imagePreview').src = getImageUrl(p.imageUrl);
                 document.getElementById('imagePreview').classList.remove('d-none');
                 document.getElementById('uploadPlaceholder').classList.add('d-none');
-            };
-            reader.readAsDataURL(input.files[0]);
+            } else {
+                resetImagePreview();
+            }
+            productModal.show();
         }
-    }
-    function resetImagePreview() {
-        document.getElementById('imagePreview').classList.add('d-none');
-        document.getElementById('uploadPlaceholder').classList.remove('d-none');
-        document.getElementById('productImage').value = '';
-    }
 
-    // ===== DRAG & DROP =====
-    const zone = document.getElementById('uploadZone');
-    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragging'); });
-    zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
-    zone.addEventListener('drop', e => {
-        e.preventDefault();
-        zone.classList.remove('dragging');
-        const files = e.dataTransfer.files;
-        if (files.length) {
-            document.getElementById('productImage').files = files;
-            previewImage(document.getElementById('productImage'));
+        // ===== OPEN DETAIL MODAL =====
+        function openDetailModal(id) {
+            const p = allProducts.find(x => x.productId === id);
+            if (!p) return;
+            document.getElementById('detailImg').src = getImageUrl(p.imageUrl);
+            document.getElementById('detailImg').onerror = function () { imgError(this); };
+            document.getElementById('detailName').textContent = p.nameProduct;
+            document.getElementById('detailCategory').textContent = p.category?.categoryName || 'Chưa phân loại';
+            document.getElementById('detailPrice').textContent = formatPrice(p.price) + ' VNĐ';
+            document.getElementById('detailStock').textContent = p.stockQuantity + ' sản phẩm';
+            document.getElementById('detailExpiry').textContent = p.expiryDate || 'Không có';
+            detailModal.show();
         }
-    });
 
-    // ===== UTILITIES =====
-    window.DEFAULT_IMG = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200">
+        // ===== OPEN DELETE MODAL =====
+        function openDeleteModal(id, name) {
+            deleteTargetId = id;
+            document.getElementById('deleteProductName').textContent = name;
+            deleteModal.show();
+        }
+
+        // ===== SUBMIT PRODUCT (ADD / EDIT) =====
+        async function submitProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const price = document.getElementById('productPrice').value;
+            if (!name || !price) { showToast('Vui lòng điền tên và giá sản phẩm!', 'error'); return; }
+
+            const id = document.getElementById('editProductId').value;
+            const formData = new FormData();
+            formData.append('nameProduct', name);
+            formData.append('price', price);
+            formData.append('stockQuantity', document.getElementById('productStock').value || 0);
+            const category = document.getElementById('productCategory').value;
+            if (category) formData.append('categoryId', category);
+            const expiry = document.getElementById('productExpiry').value;
+            if (expiry) formData.append('expiryDate', expiry);
+            const imageFile = document.getElementById('productImage').files[0];
+            if (imageFile) formData.append('imageFile', imageFile);
+
+            const url = id ? `/api/products/${id}` : '/api/products';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, { method, body: formData });
+            if (res.ok) {
+                productModal.hide();
+                showToast(id ? '✅ Cập nhật thành công!' : '✅ Thêm sản phẩm thành công!', 'success');
+                await loadProducts(activeCategory);
+            } else {
+                const msg = await res.text();
+                showToast('❌ Lỗi: ' + msg, 'error');
+            }
+        }
+
+        // ===== CONFIRM DELETE =====
+        async function confirmDelete() {
+            if (!deleteTargetId) return;
+            const res = await fetch(`/api/products/${deleteTargetId}`, { method: 'DELETE' });
+            if (res.ok) {
+                deleteModal.hide();
+                showToast('🗑️ Đã xóa sản phẩm!', 'success');
+                await loadProducts(activeCategory);
+            } else {
+                showToast('❌ Không thể xóa sản phẩm!', 'error');
+            }
+            deleteTargetId = null;
+        }
+
+        // ===== IMAGE PREVIEW =====
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').classList.remove('d-none');
+                    document.getElementById('uploadPlaceholder').classList.add('d-none');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        function resetImagePreview() {
+            document.getElementById('imagePreview').classList.add('d-none');
+            document.getElementById('uploadPlaceholder').classList.remove('d-none');
+            document.getElementById('productImage').value = '';
+        }
+
+        // ===== DRAG & DROP =====
+        const zone = document.getElementById('uploadZone');
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragging'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            zone.classList.remove('dragging');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                document.getElementById('productImage').files = files;
+                previewImage(document.getElementById('productImage'));
+            }
+        });
+
+        // ===== UTILITIES =====
+        window.DEFAULT_IMG = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
+            `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200">
             <rect width="300" height="200" fill="#fce4ec" rx="12"/>
             <rect x="110" y="60" width="80" height="80" rx="40" fill="#f8bbd0"/>
             <text x="150" y="108" font-size="13" text-anchor="middle" fill="#e91e63" font-family="sans-serif" font-weight="bold">Chua co anh</text>
         </svg>`
-    );
+        );
 
-    window.imgError = function(el) {
-        el.onerror = null;
-        el.src = window.DEFAULT_IMG;
-    }
+        window.imgError = function (el) {
+            el.onerror = null;
+            el.src = window.DEFAULT_IMG;
+        }
 
-    function getImageUrl(url) {
-        if (!url || url === 'default_candy.png') return window.DEFAULT_IMG;
-        return url.startsWith('/') ? url : '/' + url;
-    }
-    function formatPrice(price) {
-        return Number(price).toLocaleString('vi-VN');
-    }
-    function escapeHtml(str) {
-        return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-    }
-    function showToast(msg, type = 'success') {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = `toast-msg ${type}`;
-        toast.textContent = msg;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
-    }
-</script>
+        function getImageUrl(url) {
+            if (!url || url === 'default_candy.png') return window.DEFAULT_IMG;
+            return url.startsWith('/') ? url : '/' + url;
+        }
+        function formatPrice(price) {
+            return Number(price).toLocaleString('vi-VN');
+        }
+        function escapeHtml(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        }
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-msg ${type}`;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        function logout() {
+            fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    window.location.href = '/home';
+                })
+                .catch(err => {
+                    console.error('Logout error:', err);
+                    window.location.href = '/home';
+                });
+        }
+    </script>
 </body>
+
 </html>

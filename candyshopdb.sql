@@ -90,5 +90,3 @@ INSERT INTO Categories (category_name) VALUES
 ('Snack'),
 ('Kẹo trái cây');
 INSERT INTO Roles (role_name) VALUES ('Admin'), ('Staff'), ('Customer');
-
-select * from Users;

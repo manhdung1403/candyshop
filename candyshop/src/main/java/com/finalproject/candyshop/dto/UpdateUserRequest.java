@@ -3,7 +3,8 @@ package com.finalproject.candyshop.dto;
 import lombok.Data;
 
 @Data
-public class LoginRequest {
+public class UpdateUserRequest {
     private String email;
-    private String password;
+    private String phone;
+    private String address;
 }
