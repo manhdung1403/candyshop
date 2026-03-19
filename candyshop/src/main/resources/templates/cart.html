@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng - Candy Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { font-family: 'Nunito', sans-serif; background: #fff5f9; }
+        .navbar { background: linear-gradient(135deg, #ff4d8d 0%, #b05cff 100%); padding: 14px 32px; box-shadow: 0 4px 20px rgba(255, 77, 141, 0.35); }
+        .navbar-brand { font-family: 'Pacifico', cursive; font-size: 1.9rem; color: #fff !important; letter-spacing: 1px; text-shadow: 2px 2px 8px rgba(0,0,0,0.15); }
+        .btn-logout { background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.6); color: #fff; border-radius: 50px; padding: 7px 20px; font-weight: 700; transition: all 0.3s; }
+        .btn-logout:hover { background: rgba(255,255,255,0.35); color: #fff; }
+        .cart-table { background: #fff; border-radius: 20px; box-shadow: 0 8px 24px rgba(176, 92, 255, 0.1); }
+        .cart-header { padding: 24px; }
+        .cart-body { padding: 0 24px 24px; }
+        .product-cell { display: flex; align-items: center; gap: 14px; }
+        .product-cell img { width: 72px; height: 72px; object-fit: cover; border-radius: 14px; border: 1px solid #f0f0f0; }
+        .qty-input { width: 80px; }
+        .summary { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 8px 24px rgba(176, 92, 255, 0.1); }
+        .summary h5 { font-weight: 800; color: #333; }
+        .summary-row { display: flex; justify-content: space-between; margin: 12px 0; }
+        .summary-row.total { font-size: 1.4rem; font-weight: 900; color: #ff4d8d; }
+        .btn-primary { background: linear-gradient(135deg, #ff4d8d, #b05cff); border: none; }
+        .btn-primary:hover { background: linear-gradient(135deg, #e63977, #9933d6); }
+        .empty-state { text-align: center; padding: 100px 24px; }
+        .empty-state .emoji { font-size: 5rem; display: block; margin-bottom: 16px; }
+        .toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 9999; }
+        .toast-msg { background: #fff; border-left: 5px solid #ff4d8d; border-radius: 14px; padding: 16px 22px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); font-weight: 700; color: #333; animation: toastIn 0.4s ease; }
+        .toast-msg.success { border-color: #00c9a7; }
+        .toast-msg.error { border-color: #ff4d4d; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="d-flex align-items-center w-100 gap-3">
+        <a class="navbar-brand" href="/home"><span>🍬</span> Candy Shop</a>
+        <div class="ms-auto d-flex gap-2 align-items-center">
+            <a href="/home" class="btn-logout"><i class="bi bi-arrow-left"></i> Tiếp tục mua</a>
+            <a href="#" class="btn-logout" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row gy-4">
+        <div class="col-lg-8">
+            <div class="cart-table" id="cartTableWrapper">
+                <div class="cart-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">Giỏ hàng của bạn</h3>
+                        <p class="text-muted" id="cartSubtitle">Xem lại sản phẩm và điều chỉnh số lượng</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-info text-dark" id="cartCountBadge">0</span>
+                    </div>
+                </div>
+                <div class="cart-body" id="cartBody">
+                    <div class="spinner-wrap"><div class="spinner-candy"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="summary" id="summaryWrapper">
+                <h5>Thanh toán</h5>
+                <div class="summary-row">
+                    <span>Tổng sản phẩm</span>
+                    <span id="summaryCount">0</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Tổng tiền</span>
+                    <span id="summaryTotal">0 VNĐ</span>
+                </div>
+                <button class="btn btn-primary w-100 mt-3" id="checkoutBtn">Thanh toán</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function getCurrentUser() {
+        try { return JSON.parse(localStorage.getItem('candyUser')) || null; } catch (e) { return null; }
+    }
+
+    function showToast(msg, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast-msg ${type}`;
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+    }
+
+    function formatPrice(price) {
+        return Number(price).toLocaleString('vi-VN') + ' VNĐ';
+    }
+
+    async function loadCart() {
+        const user = getCurrentUser();
+        if (!user) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const res = await fetch(`/api/cart?userId=${user.userId}`);
+        if (!res.ok) {
+            showToast('Không thể tải giỏ hàng.', 'error');
+            return;
+        }
+        const cart = await res.json();
+        renderCart(cart);
+    }
+
+    function renderCart(cart) {
+        const body = document.getElementById('cartBody');
+        const badge = document.getElementById('cartCountBadge');
+        const countEl = document.getElementById('summaryCount');
+        const totalEl = document.getElementById('summaryTotal');
+
+        const items = cart.items || [];
+        const totalQty = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+        badge.textContent = totalQty;
+        countEl.textContent = totalQty;
+        totalEl.textContent = formatPrice(cart.totalPrice || 0);
+
+        if (!items.length) {
+            body.innerHTML = `
+                <div class="empty-state">
+                    <span class="emoji">🛒</span>
+                    <h4>Giỏ hàng trống</h4>
+                    <p class="text-muted">Hãy thêm sản phẩm vào giỏ để bắt đầu mua sắm.</p>
+                </div>`;
+            return;
+        }
+
+        body.innerHTML = `
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th class="text-center">Số lượng</th>
+                            <th class="text-end">Giá</th>
+                            <th class="text-end">Tạm tính</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map(item => {
+                            return `
+                                <tr data-id="${item.productId}">
+                                    <td>
+                                        <div class="product-cell">
+                                            <img src="${item.imageUrl || ''}" alt="${item.productName}" onerror="this.src='data:image/svg+xml;charset=utf-8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"80\" height=\"80\"><rect width=\"80\" height=\"80\" fill=\"%23fce4ec\" rx=\"14\"/><text x=\"40\" y=\"45\" font-size=\"12\" text-anchor=\"middle\" fill=\"%23e91e63\" font-family=\"sans-serif\" font-weight=\"bold\">Không có ảnh</text></svg>'">
+                                            <div>
+                                                <div class="fw-bold">${item.productName}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="number" min="1" class="form-control qty-input" value="${item.quantity}" onchange="updateQuantity(${item.productId}, this.value)">
+                                    </td>
+                                    <td class="text-end">${formatPrice(item.unitPrice)}</td>
+                                    <td class="text-end">${formatPrice(item.subtotal)}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${item.productId})">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    async function updateQuantity(productId, qty) {
+        const user = getCurrentUser();
+        if (!user) return;
+        const quantity = Number(qty);
+        if (!quantity || quantity < 1) return;
+
+        const res = await fetch('/api/cart/items', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.userId, productId, quantity })
+        });
+        if (!res.ok) {
+            const msg = await res.text();
+            showToast(msg || 'Không thể cập nhật số lượng.', 'error');
+            return;
+        }
+        await loadCart();
+        showToast('Cập nhật giỏ hàng thành công.', 'success');
+    }
+
+    async function removeItem(productId) {
+        const user = getCurrentUser();
+        if (!user) return;
+        const res = await fetch(`/api/cart/items?userId=${user.userId}&productId=${productId}`, { method: 'DELETE' });
+        if (!res.ok) {
+            const msg = await res.text();
+            showToast(msg || 'Không thể xóa sản phẩm.', 'error');
+            return;
+        }
+        await loadCart();
+        showToast('Đã xóa sản phẩm khỏi giỏ hàng.', 'success');
+    }
+
+    document.getElementById('checkoutBtn').addEventListener('click', () => {
+        showToast('Chức năng thanh toán chưa được triển khai.', 'error');
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('candyUser');
+        window.location.href = '/login';
+    });
+
+    loadCart();
+</script>
+</body>
+</html>

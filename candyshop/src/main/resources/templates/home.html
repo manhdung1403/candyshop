@@ -291,12 +291,7 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-
-        .btn-detail:hover {
-            background: var(--candy-purple);
-            color: #fff;
-        }
-
+        .btn-detail:hover { background: var(--candy-purple); color: #fff; }
         .btn-edit {
             background: #fff8e0;
             color: #f5a623;
@@ -685,34 +680,19 @@
 
 <body>
 
-    <!-- ===== NAVBAR ===== -->
-    <nav class="navbar">
-        <div class="d-flex align-items-center w-100 gap-3">
-            <a class="navbar-brand" href="/home"><span>🍬</span> Candy Shop</a>
-            <input type="text" class="nav-search" id="searchInput" placeholder="🔍  Tìm sản phẩm...">
-            <div class="ms-auto d-flex gap-2 align-items-center">
-                <!-- Nếu đã đăng nhập -->
-                <div th:if="${isLoggedIn}" style="display: flex; gap: 12px; align-items: center;">
-                    <a href="/profile"
-                        style="color:rgba(255,255,255,0.85);font-weight:700;font-size:0.9rem; text-decoration: none; cursor: pointer;">
-                        <i class="bi bi-person-circle"></i> Xin chào, <span th:text="${username}"></span>!
-                    </a>
-                    <button onclick="logout()" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Đăng
-                        xuất</button>
-                </div>
-                <!-- Nếu chưa đăng nhập -->
-                <div th:unless="${isLoggedIn}" style="display: flex; gap: 12px; align-items: center;">
-                    <a href="/login" class="btn-logout" style="text-decoration: none;">
-                        <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
-                    </a>
-                    <a href="/register" class="btn-logout"
-                        style="background: rgba(255,255,255,0.3); text-decoration: none;">
-                        <i class="bi bi-person-plus"></i> Đăng ký
-                    </a>
-                </div>
-            </div>
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+    <div class="d-flex align-items-center w-100 gap-3">
+        <a class="navbar-brand" href="/home"><span>🍬</span> Candy Shop</a>
+        <input type="text" class="nav-search" id="searchInput" placeholder="🔍  Tìm sản phẩm...">
+        <div class="ms-auto d-flex gap-2 align-items-center">
+            <span style="color:rgba(255,255,255,0.85);font-weight:700;font-size:0.9rem;">
+                <i class="bi bi-person-circle"></i> Xin chào!
+            </span>
+            <a href="/login" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <!-- ===== FILTER BAR ===== -->
     <div class="filter-bar">
@@ -899,12 +879,12 @@
         const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-        // ===== INIT =====
-        window.onload = async () => {
-            await loadCategories();
-            await loadProducts();
-            document.getElementById('searchInput').addEventListener('input', filterProducts);
-        };
+    // ===== INIT =====
+    window.onload = async () => {
+        await loadCategories();
+        await loadProducts();
+        document.getElementById('searchInput').addEventListener('input', filterProducts);
+    };
 
         // ===== LOAD CATEGORIES =====
         async function loadCategories() {
@@ -967,6 +947,9 @@
                         ${formatPrice(p.price)} <small>VNĐ</small>
                     </div>
                     <div class="card-actions" onclick="event.stopPropagation()">
+                        <button class="btn-add-cart" onclick="addToCart(${p.productId});">
+                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                        </button>
                         <button class="btn-detail" onclick="openDetailModal(${p.productId})">
                             <i class="bi bi-eye"></i> Chi tiết
                         </button>
@@ -1158,47 +1141,25 @@
             el.src = window.DEFAULT_IMG;
         }
 
-        function getImageUrl(url) {
-            if (!url || url === 'default_candy.png') return window.DEFAULT_IMG;
-            return url.startsWith('/') ? url : '/' + url;
-        }
-        function formatPrice(price) {
-            const num = Number(price);
-            if (Number.isNaN(num)) return '0';
-            // If the stored value already looks like a full VND amount (e.g. 50.000), just format it.
-            // Otherwise, treat the stored value as "thousands" (e.g. 50 -> 50.000 VND).
-            if (num >= 1000 && num % 1000 === 0) {
-                return num.toLocaleString('vi-VN');
-            }
-            return (num * 1000).toLocaleString('vi-VN');
-        }
-        function escapeHtml(str) {
-            return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-        }
-        function showToast(msg, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast-msg ${type}`;
-            toast.textContent = msg;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
-        }
-
-        function logout() {
-            fetch('/api/auth/logout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    window.location.href = '/home';
-                })
-                .catch(err => {
-                    console.error('Logout error:', err);
-                    window.location.href = '/home';
-                });
-        }
-    </script>
+    function getImageUrl(url) {
+        if (!url || url === 'default_candy.png') return window.DEFAULT_IMG;
+        return url.startsWith('/') ? url : '/' + url;
+    }
+    function formatPrice(price) {
+        return Number(price).toLocaleString('vi-VN');
+    }
+    function escapeHtml(str) {
+        return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    }
+    function showToast(msg, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast-msg ${type}`;
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+    }
+</script>
 </body>
 
 </html>

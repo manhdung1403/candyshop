@@ -38,11 +38,18 @@
                 password: document.getElementById('password').value
             })
         });
-        const msg = await res.text();
         const box = document.getElementById('messageBox');
-        box.className = res.ok ? 'alert alert-success' : 'alert alert-danger';
-        box.innerText = msg;
-        if(res.ok) setTimeout(() => window.location.href = '/login', 1500);
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('candyUser', JSON.stringify({ userId: data.userId, username: data.username }));
+            box.className = 'alert alert-success';
+            box.innerText = data.message || 'Đăng ký thành công!';
+            setTimeout(() => window.location.href = '/', 1500);
+        } else {
+            const msg = await res.text();
+            box.className = 'alert alert-danger';
+            box.innerText = msg;
+        }
     };
 </script>
 </body>

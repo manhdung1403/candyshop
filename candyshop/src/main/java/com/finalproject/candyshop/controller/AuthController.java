@@ -48,16 +48,19 @@ public class AuthController {
         cart.setUser(savedUser);
         cartRepository.save(cart);
 
-        return ResponseEntity.ok("Đăng ký thành công!");
+        return ResponseEntity.ok(
+                java.util.Map.of(
+                        "message", "Đăng ký thành công!",
+                        "userId", savedUser.getUserId(),
+                        "username", savedUser.getUsername()
+                )
+        );
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
         Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
         if (userOpt.isPresent() && passwordEncoder.matches(request.getPassword(), userOpt.get().getPasswordHash())) {
-            User user = userOpt.get();
-            session.setAttribute("user", user);
-            session.setAttribute("username", user.getUsername());
             return ResponseEntity.ok("Đăng nhập thành công!");
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sai tài khoản hoặc mật khẩu!");
