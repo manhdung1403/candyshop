@@ -1163,7 +1163,14 @@
             return url.startsWith('/') ? url : '/' + url;
         }
         function formatPrice(price) {
-            return Number(price).toLocaleString('vi-VN');
+            const num = Number(price);
+            if (Number.isNaN(num)) return '0';
+            // If the stored value already looks like a full VND amount (e.g. 50.000), just format it.
+            // Otherwise, treat the stored value as "thousands" (e.g. 50 -> 50.000 VND).
+            if (num >= 1000 && num % 1000 === 0) {
+                return num.toLocaleString('vi-VN');
+            }
+            return (num * 1000).toLocaleString('vi-VN');
         }
         function escapeHtml(str) {
             return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
