@@ -1,5 +1,21 @@
 package com.finalproject.candyshop.controller;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.finalproject.candyshop.dto.CartDto;
 import com.finalproject.candyshop.dto.CartItemDto;
 import com.finalproject.candyshop.dto.CartItemRequest;
@@ -11,14 +27,6 @@ import com.finalproject.candyshop.repository.CartItemRepository;
 import com.finalproject.candyshop.repository.CartRepository;
 import com.finalproject.candyshop.repository.ProductRepository;
 import com.finalproject.candyshop.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -58,7 +66,10 @@ public class CartController {
     @GetMapping("/count")
     public ResponseEntity<Integer> getCartItemCount(@RequestParam Integer userId) {
         Cart cart = getOrCreateCart(userId);
-        int count = cart.getItems().stream().mapToInt(i -> i.getQuantity() != null ? i.getQuantity() : 0).sum();
+        int count = cart.getItems().stream().mapToInt(i -> {
+            Integer q = i.getQuantity();
+            return q == null ? 0 : q;
+        }).sum();
         return ResponseEntity.ok(count);
     }
 
@@ -78,7 +89,9 @@ public class CartController {
 
         if (existing.isPresent()) {
             CartItem item = existing.get();
-            int newQty = (item.getQuantity() != null ? item.getQuantity() : 0) + request.getQuantity();
+            Integer currentQty = item.getQuantity();
+            int safeQty = currentQty == null ? 0 : currentQty;
+            int newQty = safeQty + request.getQuantity();
             item.setQuantity(Math.max(newQty, 1));
             cartItemRepository.save(item);
         } else {

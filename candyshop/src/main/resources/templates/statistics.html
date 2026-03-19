@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống kê - Candy Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: #fff5f9;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #ff4d8d 0%, #b05cff 100%);
+            padding: 14px 32px;
+            box-shadow: 0 4px 20px rgba(255, 77, 141, 0.35);
+        }
+
+        .navbar-brand {
+            font-family: 'Pacifico', cursive;
+            font-size: 1.9rem;
+            color: #fff !important;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            color: #fff;
+            border-radius: 50px;
+            padding: 7px 20px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.35);
+            color: #fff;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(176, 92, 255, 0.1);
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #888;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ff4d8d;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
+        }
+
+        .toast-msg {
+            background: #fff;
+            border-left: 5px solid #ff4d8d;
+            border-radius: 14px;
+            padding: 16px 22px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            font-weight: 700;
+            color: #333;
+            animation: toastIn 0.4s ease;
+        }
+
+        .toast-msg.success {
+            border-color: #00c9a7;
+        }
+
+        .toast-msg.error {
+            border-color: #ff4d4d;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="d-flex align-items-center w-100 gap-3">
+            <a class="navbar-brand" href="/home"><span>🍬</span> Candy Shop</a>
+            <div class="ms-auto d-flex gap-2 align-items-center">
+                <a href="/home" class="btn-logout"><i class="bi bi-house"></i> Trang chủ</a>
+                <a href="/cart" class="btn-logout"><i class="bi bi-cart3"></i> Giỏ hàng</a>
+                <a href="/orders" class="btn-logout"><i class="bi bi-clock-history"></i> Lịch sử</a>
+                <a href="#" class="btn-logout" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <div class="row g-4" id="statsCards">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Tổng đơn hàng</div>
+                    <div class="stat-value" id="statOrders">--</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Tổng doanh thu</div>
+                    <div class="stat-value" id="statRevenue">--</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Giá trị trung bình đơn</div>
+                    <div class="stat-value" id="statAverage">--</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Tổng số sản phẩm đã bán</div>
+                    <div class="stat-value" id="statTotalSold">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-lg-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Sản phẩm bán nhiều nhất</h5>
+                        <p id="bestSellingProduct">--</p>
+                        <h6>Top 5 sản phẩm theo số lượng</h6>
+                        <table class="table table-sm mt-2">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Số lượng</th>
+                                    <th>Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topByQuantity"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Sản phẩm doanh thu cao nhất</h5>
+                        <p id="highestRevenueProduct">--</p>
+                        <h6>Top 5 sản phẩm theo doanh thu</h6>
+                        <table class="table table-sm mt-2">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Số lượng</th>
+                                    <th>Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topByRevenue"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function getCurrentUser() { try { return JSON.parse(localStorage.getItem('candyUser')) || null; } catch (e) { return null; } }
+        function showToast(msg, type = 'success') { const container = document.getElementById('toastContainer'); const toast = document.createElement('div'); toast.className = `toast-msg ${type}`; toast.textContent = msg; container.appendChild(toast); setTimeout(() => toast.remove(), 3500); }
+        function formatPrice(price) { return Number(price || 0).toLocaleString('vi-VN') + ' VNĐ'; }
+
+        async function loadStatistics() {
+            const user = getCurrentUser();
+            if (!user) { window.location.href = '/login'; return; }
+
+            const res = await fetch('/api/orders/statistics');
+            if (!res.ok) {
+                showToast('Không thể tải thống kê.', 'error');
+                return;
+            }
+
+            const data = await res.json();
+            document.getElementById('statOrders').textContent = data.totalOrders || 0;
+            document.getElementById('statRevenue').textContent = formatPrice(data.totalRevenue || 0);
+            document.getElementById('statAverage').textContent = formatPrice(data.averageOrder || 0);
+            document.getElementById('statTotalSold').textContent = data.totalProductsSold || 0;
+            document.getElementById('bestSellingProduct').textContent = data.bestSellingProduct ? `${data.bestSellingProduct}` : 'Chưa có dữ liệu';
+            document.getElementById('highestRevenueProduct').textContent = data.highestRevenueProduct ? `${data.highestRevenueProduct}` : 'Chưa có dữ liệu';
+
+            const topByQty = data.topProductsByQuantity || [];
+            const topByQtyBody = document.getElementById('topByQuantity');
+            topByQtyBody.innerHTML = topByQty.map((item, idx) => `<tr><td>${idx + 1}</td><td>${item.productName}</td><td>${item.totalQuantity}</td><td>${formatPrice(item.totalRevenue)}</td></tr>`).join('');
+
+            const topByRev = data.topProductsByRevenue || [];
+            const topByRevBody = document.getElementById('topByRevenue');
+            topByRevBody.innerHTML = topByRev.map((item, idx) => `<tr><td>${idx + 1}</td><td>${item.productName}</td><td>${item.totalQuantity}</td><td>${formatPrice(item.totalRevenue)}</td></tr>`).join('');
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('candyUser'); window.location.href = '/login'; });
+        loadStatistics();
+    </script>
+</body>
+
+</html>

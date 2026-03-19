@@ -18,4 +18,10 @@ public class ViewController {
 
     @GetMapping("/cart")
     public String cartPage() { return "cart"; }
+
+    @GetMapping("/orders")
+    public String orderHistoryPage() { return "order-history"; }
+
+    @GetMapping("/statistics")
+    public String statisticsPage() { return "statistics"; }
 }
