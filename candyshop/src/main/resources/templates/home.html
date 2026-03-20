@@ -761,6 +761,12 @@
         </div>
     </div>
 
+    <!-- ===== NEWEST PRODUCT ===== -->
+    <div class="products-section">
+        <div class="section-title">✨ Sản phẩm mới nhất</div>
+        <div id="newestProductContainer" class="product-grid"></div>
+    </div>
+
     <!-- ===== PRODUCT GRID ===== -->
     <div class="products-section">
         <div class="section-title">🍫 Danh Sách Sản Phẩm</div>
@@ -942,7 +948,37 @@
             const res = await fetch(url);
             allProducts = await res.json();
             renderProducts(allProducts);
+            renderNewestProduct(allProducts);
             updateStats();
+        }
+
+        // ===== RENDER NEWEST PRODUCTS =====
+        function renderNewestProduct(products) {
+            const container = document.getElementById('newestProductContainer');
+            if (!products || products.length === 0) {
+                container.innerHTML = `<div class="empty-state"><span class="emoji">🍭</span><h4>Chưa có sản phẩm mới!</h4><p style="color:#ccc;margin-top:8px;">Hãy thêm sản phẩm đầu tiên của bạn.</p></div>`;
+                return;
+            }
+            const latest = [...products].sort((a, b) => (b.productId || 0) - (a.productId || 0)).slice(0, 5);
+            container.innerHTML = latest.map(p => `
+                <div class="product-card" onclick="openDetailModal(${p.productId})">
+                    <div class="card-image-wrap">
+                        <img src="${getImageUrl(p.imageUrl)}" alt="${p.nameProduct}" onerror="imgError(this)">
+                        ${p.category ? `<span class="card-badge">${p.category.categoryName}</span>` : ''}
+                        <span class="card-stock-badge ${p.stockQuantity > 0 ? 'in-stock' : 'out-stock'}">
+                            ${p.stockQuantity > 0 ? '✓ Còn hàng' : '✕ Hết hàng'}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-name" title="${p.nameProduct}">${p.nameProduct}</div>
+                        <div class="card-category"><i class="bi bi-grid"></i> ${p.category ? p.category.categoryName : 'Chưa phân loại'}</div>
+                        <div class="card-price">${formatPrice(p.price)} <small>VNĐ</small></div>
+                        <div class="card-actions" onclick="event.stopPropagation()">
+                            <button class="btn-add-cart" onclick="addToCart(${p.productId});"><i class="bi bi-cart-plus"></i> Thêm vào giỏ</button>
+                            <button class="btn-detail" onclick="openDetailModal(${p.productId})"><i class="bi bi-eye"></i> Chi tiết</button>
+                        </div>
+                    </div>
+                </div>`).join('');
         }
 
         // ===== RENDER PRODUCTS =====
