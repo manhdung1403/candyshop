@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chỉnh sửa hồ sơ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --candy-pink: #ff4d8d;
+            --candy-purple: #b05cff;
+            --bg-light: #fff5f9;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #ff4d8d 0%, #b05cff 100%);
+            padding: 14px 32px;
+            box-shadow: 0 4px 20px rgba(255, 77, 141, 0.35);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .navbar-brand {
+            font-family: 'Pacifico', cursive;
+            font-size: 1.9rem;
+            color: #fff !important;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+        }
+
+        .btn-pill {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            color: #fff;
+            border-radius: 50px;
+            padding: 7px 20px;
+            font-weight: 800;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-pill:hover {
+            background: rgba(255, 255, 255, 0.35);
+            color: #fff;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(176, 92, 255, 0.12);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #ff4d8d, #b05cff);
+            color: #fff;
+            border: none;
+            padding: 18px 22px;
+            font-weight: 900;
+        }
+
+        .form-label {
+            font-weight: 800;
+            color: #555;
+        }
+
+        .form-control {
+            border: 2px solid #ffe0ef;
+            border-radius: 14px;
+            padding: 10px 14px;
+            font-weight: 700;
+        }
+
+        .form-control:focus {
+            border-color: var(--candy-pink);
+            box-shadow: 0 0 0 3px rgba(255, 77, 141, 0.15);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #ff4d8d, #b05cff);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 18px;
+            font-weight: 900;
+            width: 100%;
+            color: #fff;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
+        }
+
+        .toast-msg {
+            background: #fff;
+            border-left: 5px solid var(--candy-pink);
+            border-radius: 14px;
+            padding: 16px 22px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            font-weight: 800;
+            color: #333;
+            animation: toastIn 0.4s ease;
+            margin-top: 10px;
+            max-width: 360px;
+        }
+
+        .toast-msg.success {
+            border-color: #00c9a7;
+        }
+
+        .toast-msg.error {
+            border-color: #ff4d4d;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="d-flex align-items-center w-100 gap-3">
+            <a class="navbar-brand" href="/home"><span>🍬</span> Candy Shop</a>
+            <div class="ms-auto d-flex gap-2 align-items-center">
+                <a href="/profile" class="btn-pill"><i class="bi bi-house"></i> Hồ sơ</a>
+                <a href="/orders" class="btn-pill"><i class="bi bi-clock-history"></i> Lịch sử</a>
+                <a href="/cart" class="btn-pill"><i class="bi bi-cart3"></i> Giỏ hàng</a>
+                <a href="#" class="btn-pill" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4" style="max-width: 820px;">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pencil-square"></i> Chỉnh sửa hồ sơ
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tên đăng nhập</label>
+                        <input class="form-control" id="username" placeholder="Tên đăng nhập">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input class="form-control" id="email" placeholder="Email">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Số điện thoại</label>
+                        <input class="form-control" id="phone" placeholder="VD: 090xxxxxxx">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Avatar URL (tùy chọn)</label>
+                        <input class="form-control" id="avatarUrl" placeholder="VD: /uploads/abc.png">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Địa chỉ</label>
+                        <textarea class="form-control" id="address" rows="3" placeholder="Nhập địa chỉ"></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Mật khẩu mới (tùy chọn)</label>
+                        <input class="form-control" id="newPassword" type="password" placeholder="Để trống nếu không đổi">
+                    </div>
+
+                    <div class="col-6">
+                        <a href="/profile" class="btn btn-light w-100" style="border-radius:50px;font-weight:900;">
+                            Quay lại
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn-save" id="saveBtn">
+                            <i class="bi bi-check2-circle"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-msg ${type}`;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        function getCurrentUser() {
+            try {
+                return JSON.parse(localStorage.getItem('candyUser')) || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function setCurrentUser(user) {
+            localStorage.setItem('candyUser', JSON.stringify(user));
+        }
+
+        async function loadProfile() {
+            const user = getCurrentUser();
+            if (!user) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const res = await fetch(`/api/profile?userId=${user.userId}`);
+            if (!res.ok) {
+                const msg = await res.text();
+                showToast(msg || 'Không tải được hồ sơ.', 'error');
+                return;
+            }
+
+            const data = await res.json();
+            document.getElementById('username').value = data.username || '';
+            document.getElementById('email').value = data.email || '';
+            document.getElementById('phone').value = data.phone || '';
+            document.getElementById('address').value = data.address || '';
+            document.getElementById('avatarUrl').value = data.avatarUrl || '';
+        }
+
+        async function saveProfile() {
+            const user = getCurrentUser();
+            if (!user) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            const avatarUrl = document.getElementById('avatarUrl').value;
+            const newPassword = document.getElementById('newPassword').value;
+
+            if (!username || !email) {
+                showToast('Vui lòng nhập tên đăng nhập và email.', 'error');
+                return;
+            }
+
+            const payload = {
+                userId: user.userId,
+                username,
+                email,
+                phone,
+                address,
+                avatarUrl,
+                newPassword
+            };
+
+            const res = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const msg = await res.text();
+                showToast(msg || 'Cập nhật thất bại.', 'error');
+                return;
+            }
+
+            const updated = await res.json();
+            setCurrentUser({ userId: updated.userId, username: updated.username });
+            document.getElementById('newPassword').value = '';
+            showToast(updated.message || 'Cập nhật thành công!', 'success');
+
+            setTimeout(() => window.location.href = '/profile', 600);
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', saveProfile);
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('candyUser');
+            window.location.href = '/login';
+        });
+
+        loadProfile();
+    </script>
+</body>
+
+</html>

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.finalproject.candyshop.dto.CartDto;
 import com.finalproject.candyshop.dto.CartItemDto;
@@ -106,40 +107,50 @@ public class CartController {
     }
 
     @PutMapping("/items")
-    public ResponseEntity<CartDto> setItemQuantity(@RequestBody CartItemRequest request) {
-        // Sets the quantity to a specific value (used from Cart page quantity input).
-        Cart cart = getOrCreateCart(request.getUserId());
-        if (request.getProductId() == null) return ResponseEntity.badRequest().build();
-        if (request.getQuantity() == null || request.getQuantity() <= 0) return ResponseEntity.badRequest().build();
+    @Transactional
+    public ResponseEntity<?> setItemQuantity(@RequestBody CartItemRequest request) {
+        try {
+            // Sets the quantity to a specific value (used from Cart page quantity input).
+            Cart cart = getOrCreateCart(request.getUserId());
+            if (request.getProductId() == null) return ResponseEntity.badRequest().body("Thiếu productId.");
+            if (request.getQuantity() == null || request.getQuantity() <= 0) return ResponseEntity.badRequest().body("Số lượng không hợp lệ.");
 
-        Optional<CartItem> existing = cart.getItems().stream()
-                .filter(i -> i.getProduct().getProductId().equals(request.getProductId()))
-                .findFirst();
+            Optional<CartItem> existing = cart.getItems().stream()
+                    .filter(i -> i.getProduct() != null && i.getProduct().getProductId().equals(request.getProductId()))
+                    .findFirst();
 
-        if (existing.isPresent()) {
-            CartItem item = existing.get();
-            item.setQuantity(request.getQuantity());
-            cartItemRepository.save(item);
-        } else {
-            Product product = productRepository.findById(request.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
-            CartItem item = new CartItem();
-            item.setProduct(product);
-            item.setQuantity(request.getQuantity());
-            cart.addItem(item);
+            if (existing.isPresent()) {
+                CartItem item = existing.get();
+                item.setQuantity(request.getQuantity());
+                cartItemRepository.save(item);
+            } else {
+                Product product = productRepository.findById(request.getProductId())
+                        .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                CartItem item = new CartItem();
+                item.setProduct(product);
+                item.setQuantity(request.getQuantity());
+                cart.addItem(item);
+            }
+
+            cart = cartRepository.save(cart);
+            return ResponseEntity.ok(toDto(cart));
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body("Lỗi cập nhật số lượng: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
         }
-
-        cart = cartRepository.save(cart);
-        return ResponseEntity.ok(toDto(cart));
     }
 
     @DeleteMapping("/items")
-    public ResponseEntity<CartDto> removeItem(@RequestParam Integer userId, @RequestParam Integer productId) {
-        Cart cart = getOrCreateCart(userId);
-        cartItemRepository.deleteByCartCartIdAndProductProductId(cart.getCartId(), productId);
-        // Refresh cart
-        cart = cartRepository.findById(cart.getCartId()).orElse(cart);
-        return ResponseEntity.ok(toDto(cart));
+    @Transactional
+    public ResponseEntity<?> removeItem(@RequestParam Integer userId, @RequestParam Integer productId) {
+        try {
+            Cart cart = getOrCreateCart(userId);
+            cartItemRepository.deleteByCartCartIdAndProductProductId(cart.getCartId(), productId);
+            // Refresh cart
+            cart = cartRepository.findById(cart.getCartId()).orElse(cart);
+            return ResponseEntity.ok(toDto(cart));
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body("Lỗi xóa sản phẩm khỏi giỏ: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+        }
     }
 
     private CartDto toDto(Cart cart) {
@@ -147,17 +158,19 @@ public class CartController {
         dto.setCartId(cart.getCartId());
         dto.setUserId(cart.getUser() != null ? cart.getUser().getUserId() : null);
 
-        List<CartItemDto> items = cart.getItems().stream().map(item -> {
-            CartItemDto itemDto = new CartItemDto();
-            itemDto.setCartItemId(item.getCartItemId());
-            itemDto.setProductId(item.getProduct().getProductId());
-            itemDto.setProductName(item.getProduct().getNameProduct());
-            itemDto.setImageUrl(item.getProduct().getImageUrl());
-            itemDto.setUnitPrice(item.getProduct().getPrice());
-            itemDto.setQuantity(item.getQuantity());
-            itemDto.setSubtotal(item.getSubtotal());
-            return itemDto;
-        }).collect(Collectors.toList());
+        List<CartItemDto> items = cart.getItems().stream()
+                .filter(item -> item != null && item.getProduct() != null)
+                .map(item -> {
+                    CartItemDto itemDto = new CartItemDto();
+                    itemDto.setCartItemId(item.getCartItemId());
+                    itemDto.setProductId(item.getProduct().getProductId());
+                    itemDto.setProductName(item.getProduct().getNameProduct());
+                    itemDto.setImageUrl(item.getProduct().getImageUrl());
+                    itemDto.setUnitPrice(item.getProduct().getPrice());
+                    itemDto.setQuantity(item.getQuantity());
+                    itemDto.setSubtotal(item.getSubtotal());
+                    return itemDto;
+                }).collect(Collectors.toList());
 
         dto.setItems(items);
 

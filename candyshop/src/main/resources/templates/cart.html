@@ -382,7 +382,30 @@
         }
 
         const checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
-        document.getElementById('checkoutBtn').addEventListener('click', () => {
+        document.getElementById('checkoutBtn').addEventListener('click', async () => {
+            const user = getCurrentUser();
+            if (!user) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Prefill thông tin giao hàng từ profile trước khi mở modal thanh toán.
+            try {
+                const res = await fetch(`/api/profile?userId=${user.userId}`);
+                if (res.ok) {
+                    const profile = await res.json();
+                    document.getElementById('recipientName').value = profile.username || '';
+                    document.getElementById('recipientPhone').value = profile.phone || '';
+                    document.getElementById('recipientAddress').value = profile.address || '';
+                } else {
+                    // Nếu lỗi profile, vẫn cho phép người dùng nhập thủ công.
+                    const msg = await res.text();
+                    showToast(msg || 'Không tải được thông tin từ profile.', 'error');
+                }
+            } catch (e) {
+                showToast('Lỗi hệ thống. Vui lòng nhập thông tin giao hàng thủ công.', 'error');
+            }
+
             checkoutModal.show();
         });
 

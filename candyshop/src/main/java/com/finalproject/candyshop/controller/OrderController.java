@@ -7,6 +7,7 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +16,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.finalproject.candyshop.dto.ProductSalesDto;
 import com.finalproject.candyshop.entity.Cart;
 import com.finalproject.candyshop.entity.CartItem;
+import com.finalproject.candyshop.entity.Product;
 import com.finalproject.candyshop.entity.Order;
 import com.finalproject.candyshop.entity.OrderItem;
 import com.finalproject.candyshop.entity.User;
 import com.finalproject.candyshop.repository.CartRepository;
 import com.finalproject.candyshop.repository.OrderRepository;
+import com.finalproject.candyshop.repository.ProductRepository;
 import com.finalproject.candyshop.repository.UserRepository;
 
 @RestController
@@ -33,9 +37,11 @@ public class OrderController {
     @Autowired private OrderRepository orderRepository;
     @Autowired private CartRepository cartRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private ProductRepository productRepository;
     @Autowired private com.finalproject.candyshop.repository.OrderItemRepository orderItemRepository;
 
     @PostMapping("/checkout")
+    @Transactional
     public ResponseEntity<?> checkoutOrder(
             @RequestParam Integer userId,
             @RequestParam String recipientName,
@@ -55,6 +61,41 @@ public class OrderController {
             return ResponseEntity.badRequest().body("Giỏ hàng trống.");
         }
 
+        // Tổng hợp số lượng theo từng sản phẩm để kiểm tra tồn kho & cập nhật đồng nhất.
+        Map<Integer, Integer> qtyByProductId = cart.getItems().stream()
+                .filter(i -> i != null && i.getProduct() != null && i.getProduct().getProductId() != null)
+                .collect(Collectors.toMap(
+                        i -> i.getProduct().getProductId(),
+                        i -> i.getQuantity() == null ? 0 : i.getQuantity(),
+                        Integer::sum
+                ));
+
+        if (qtyByProductId.isEmpty()) {
+            return ResponseEntity.badRequest().body("Giỏ hàng không hợp lệ.");
+        }
+
+        // Reload products để kiểm tra tồn kho & dùng đúng giá tại thời điểm checkout.
+        Map<Integer, Product> productsById = productRepository.findAllById(qtyByProductId.keySet()).stream()
+                .collect(Collectors.toMap(Product::getProductId, p -> p));
+
+        for (Map.Entry<Integer, Integer> e : qtyByProductId.entrySet()) {
+            Integer productId = e.getKey();
+            Integer qty = e.getValue();
+            if (qty == null || qty <= 0) {
+                return ResponseEntity.badRequest().body("Số lượng sản phẩm không hợp lệ.");
+            }
+
+            Product product = productsById.get(productId);
+            if (product == null) {
+                return ResponseEntity.badRequest().body("Sản phẩm không tồn tại (id=" + productId + ").");
+            }
+
+            int stock = product.getStockQuantity() == null ? 0 : product.getStockQuantity();
+            if (stock < qty) {
+                return ResponseEntity.badRequest().body("Hết hàng cho sản phẩm: " + product.getNameProduct());
+            }
+        }
+
         LocalDate parsedDeliveryDate;
         try {
             parsedDeliveryDate = LocalDate.parse(deliveryDate);
@@ -70,12 +111,19 @@ public class OrderController {
         order.setDeliveryDate(parsedDeliveryDate);
 
         BigDecimal total = BigDecimal.ZERO;
-        for (CartItem cartItem : cart.getItems()) {
+        for (Map.Entry<Integer, Integer> e : qtyByProductId.entrySet()) {
+            Integer productId = e.getKey();
+            Integer qty = e.getValue();
+
+            Product product = productsById.get(productId);
+            // qtyByProductId đã được validate nên product cũng không null theo logic phía trên.
+            if (product == null) continue;
+
             OrderItem orderItem = new OrderItem();
-            orderItem.setProduct(cartItem.getProduct());
-            orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setUnitPrice(cartItem.getProduct().getPrice());
-            BigDecimal subtotal = cartItem.getProduct().getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+            orderItem.setProduct(product);
+            orderItem.setQuantity(qty);
+            orderItem.setUnitPrice(product.getPrice());
+            BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(qty));
             orderItem.setSubtotal(subtotal);
             order.addItem(orderItem);
             total = total.add(subtotal);
@@ -83,6 +131,18 @@ public class OrderController {
         order.setTotalAmount(total);
 
         orderRepository.save(order);
+
+        // Sau khi tạo đơn thành công: cập nhật tồn kho theo số lượng đã mua.
+        for (Map.Entry<Integer, Integer> e : qtyByProductId.entrySet()) {
+            Integer productId = e.getKey();
+            Integer qty = e.getValue();
+            Product product = productsById.get(productId);
+            if (product == null) continue;
+
+            int stock = product.getStockQuantity() == null ? 0 : product.getStockQuantity();
+            product.setStockQuantity(stock - qty);
+            productRepository.save(product);
+        }
 
         cart.getItems().clear();
         cartRepository.save(cart);

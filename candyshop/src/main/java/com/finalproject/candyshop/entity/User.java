@@ -17,6 +17,14 @@ public class User {
     private String passwordHash;
     
     private String email;
+
+    private String phone;
+
+    @Column(columnDefinition = "TEXT")
+    private String address;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")

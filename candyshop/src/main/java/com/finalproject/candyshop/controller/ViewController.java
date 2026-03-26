@@ -24,4 +24,10 @@ public class ViewController {
 
     @GetMapping("/statistics")
     public String statisticsPage() { return "statistics"; }
+
+    @GetMapping("/profile")
+    public String profilePage() { return "profile"; }
+
+    @GetMapping("/editprofile")
+    public String editProfilePage() { return "editprofile"; }
 }
