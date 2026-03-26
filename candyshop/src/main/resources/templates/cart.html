@@ -234,7 +234,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Ngày giao hàng</label>
-                        <input type="date" id="deliveryDate" class="form-control" min="2020-01-01" />
+                        <input type="date" id="deliveryDate" class="form-control" />
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -246,6 +246,13 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Thiết lập min date cho input ngày giao hàng là ngày hôm nay
+        document.addEventListener('DOMContentLoaded', () => {
+            const deliveryDateInput = document.getElementById('deliveryDate');
+            const today = new Date().toISOString().split('T')[0];
+            deliveryDateInput.setAttribute('min', today);
+        });
+
         function getCurrentUser() {
             try { return JSON.parse(localStorage.getItem('candyUser')) || null; } catch (e) { return null; }
         }
@@ -263,10 +270,22 @@
             return Number(price).toLocaleString('vi-VN') + ' VNĐ';
         }
 
+        // SVG fallback được tạo 1 lần, dùng chung cho tất cả ảnh lỗi
+        const FALLBACK_IMG = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80">' +
+            '<rect width="80" height="80" fill="#fce4ec" rx="14"/>' +
+            '<text x="40" y="45" font-size="12" text-anchor="middle" fill="#e91e63" font-family="sans-serif" font-weight="bold">Không có ảnh</text>' +
+            '</svg>'
+        );
+
         function getImageUrl(url) {
-            const defaultImg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="%23fce4ec" rx="14"/><text x="40" y="45" font-size="12" text-anchor="middle" fill="%23e91e63" font-family="sans-serif" font-weight="bold">Không có ảnh</text></svg>');
-            if (!url || url === 'default_candy.png') return defaultImg;
+            if (!url || url === 'default_candy.png') return FALLBACK_IMG;
             return url.startsWith('/') ? url : '/' + url;
+        }
+
+        function handleImgError(img) {
+            img.onerror = null; // tránh vòng lặp vô hạn
+            img.src = FALLBACK_IMG;
         }
 
         async function loadCart() {
@@ -320,29 +339,32 @@
                         </tr>
                     </thead>
                     <tbody>
-                        ${items.map(item => {
-                return `
-                                <tr data-id="${item.productId}">
-                                    <td>
-                                        <div class="product-cell">
-                                            <img src="${getImageUrl(item.imageUrl)}" alt="${item.productName}" onerror="this.src='data:image/svg+xml;charset=utf-8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"80\" height=\"80\"><rect width=\"80\" height=\"80\" fill=\"%23fce4ec\" rx=\"14\"/><text x=\"40\" y=\"45\" font-size=\"12\" text-anchor=\"middle\" fill=\"%23e91e63\" font-family=\"sans-serif\" font-weight=\"bold\">Không có ảnh</text></svg>'">
-                                            <div>
-                                                <div class="fw-bold">${item.productName}</div>
-                                            </div>
+                        ${items.map(item => `
+                            <tr data-id="${item.productId}">
+                                <td>
+                                    <div class="product-cell">
+                                        <img src="${getImageUrl(item.imageUrl)}"
+                                             alt="${item.productName}"
+                                             onerror="handleImgError(this)">
+                                        <div>
+                                            <div class="fw-bold">${item.productName}</div>
                                         </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <input type="number" min="1" class="form-control qty-input" value="${item.quantity}" onchange="updateQuantity(${item.productId}, this.value)">
-                                    </td>
-                                    <td class="text-end">${formatPrice(item.unitPrice)}</td>
-                                    <td class="text-end">${formatPrice(item.subtotal)}</td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${item.productId})">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>`;
-            }).join('')}
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <input type="number" min="1" class="form-control qty-input"
+                                           value="${item.quantity}"
+                                           onchange="updateQuantity(${item.productId}, this.value)">
+                                </td>
+                                <td class="text-end">${formatPrice(item.unitPrice)}</td>
+                                <td class="text-end">${formatPrice(item.subtotal)}</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            onclick="removeItem(${item.productId})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>`).join('')}
                     </tbody>
                 </table>
             </div>`;
@@ -371,7 +393,9 @@
         async function removeItem(productId) {
             const user = getCurrentUser();
             if (!user) return;
-            const res = await fetch(`/api/cart/items?userId=${user.userId}&productId=${productId}`, { method: 'DELETE' });
+            const res = await fetch(`/api/cart/items?userId=${user.userId}&productId=${productId}`, {
+                method: 'DELETE'
+            });
             if (!res.ok) {
                 const msg = await res.text();
                 showToast(msg || 'Không thể xóa sản phẩm.', 'error');
@@ -389,7 +413,6 @@
                 return;
             }
 
-            // Prefill thông tin giao hàng từ profile trước khi mở modal thanh toán.
             try {
                 const res = await fetch(`/api/profile?userId=${user.userId}`);
                 if (res.ok) {
@@ -398,7 +421,6 @@
                     document.getElementById('recipientPhone').value = profile.phone || '';
                     document.getElementById('recipientAddress').value = profile.address || '';
                 } else {
-                    // Nếu lỗi profile, vẫn cho phép người dùng nhập thủ công.
                     const msg = await res.text();
                     showToast(msg || 'Không tải được thông tin từ profile.', 'error');
                 }

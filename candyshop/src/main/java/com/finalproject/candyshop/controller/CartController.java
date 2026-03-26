@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.finalproject.candyshop.dto.CartDto;
 import com.finalproject.candyshop.dto.CartItemDto;
@@ -75,10 +75,9 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    public ResponseEntity<CartDto> addItemToCart(@RequestBody CartItemRequest request) {
-        // Adds quantity (default 1) to an existing cart item (or creates new). This is used by "Thêm vào giỏ".
+    public ResponseEntity<?> addItemToCart(@RequestBody CartItemRequest request) {
         Cart cart = getOrCreateCart(request.getUserId());
-        if (request.getProductId() == null) return ResponseEntity.badRequest().build();
+        if (request.getProductId() == null) return ResponseEntity.badRequest().body("Thiếu productId");
         if (request.getQuantity() == null || request.getQuantity() <= 0) request.setQuantity(1);
 
         Product product = productRepository.findById(request.getProductId())
@@ -88,12 +87,18 @@ public class CartController {
                 .filter(i -> i.getProduct().getProductId().equals(product.getProductId()))
                 .findFirst();
 
+        // Tính toán tổng số lượng nếu thêm vào giỏ
+        int currentQty = existing.isPresent() ? (existing.get().getQuantity() == null ? 0 : existing.get().getQuantity()) : 0;
+        int newQty = currentQty + request.getQuantity();
+
+        // KIỂM TRA TỒN KHO: Chặn nếu vượt quá số lượng kho
+        if (product.getStockQuantity() == null || newQty > product.getStockQuantity()) {
+            return ResponseEntity.badRequest().body("Vượt quá số lượng tồn kho (" + product.getStockQuantity() + " sản phẩm).");
+        }
+
         if (existing.isPresent()) {
             CartItem item = existing.get();
-            Integer currentQty = item.getQuantity();
-            int safeQty = currentQty == null ? 0 : currentQty;
-            int newQty = safeQty + request.getQuantity();
-            item.setQuantity(Math.max(newQty, 1));
+            item.setQuantity(newQty);
             cartItemRepository.save(item);
         } else {
             CartItem item = new CartItem();
@@ -110,13 +115,22 @@ public class CartController {
     @Transactional
     public ResponseEntity<?> setItemQuantity(@RequestBody CartItemRequest request) {
         try {
-            // Sets the quantity to a specific value (used from Cart page quantity input).
             Cart cart = getOrCreateCart(request.getUserId());
             if (request.getProductId() == null) return ResponseEntity.badRequest().body("Thiếu productId.");
-            if (request.getQuantity() == null || request.getQuantity() <= 0) return ResponseEntity.badRequest().body("Số lượng không hợp lệ.");
+            if (request.getQuantity() == null || request.getQuantity() <= 0)
+                return ResponseEntity.badRequest().body("Số lượng không hợp lệ.");
+
+            Product product = productRepository.findById(request.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+            // KIỂM TRA TỒN KHO: Khi update trực tiếp số lượng trong trang Cart
+            if (product.getStockQuantity() == null || request.getQuantity() > product.getStockQuantity()) {
+                return ResponseEntity.badRequest().body("Số lượng cập nhật vượt quá tồn kho (" + product.getStockQuantity() + ").");
+            }
 
             Optional<CartItem> existing = cart.getItems().stream()
-                    .filter(i -> i.getProduct() != null && i.getProduct().getProductId().equals(request.getProductId()))
+                    .filter(i -> i.getProduct() != null
+                              && i.getProduct().getProductId().equals(request.getProductId()))
                     .findFirst();
 
             if (existing.isPresent()) {
@@ -124,8 +138,6 @@ public class CartController {
                 item.setQuantity(request.getQuantity());
                 cartItemRepository.save(item);
             } else {
-                Product product = productRepository.findById(request.getProductId())
-                        .orElseThrow(() -> new IllegalArgumentException("Product not found"));
                 CartItem item = new CartItem();
                 item.setProduct(product);
                 item.setQuantity(request.getQuantity());
@@ -135,7 +147,8 @@ public class CartController {
             cart = cartRepository.save(cart);
             return ResponseEntity.ok(toDto(cart));
         } catch (Exception ex) {
-            return ResponseEntity.status(500).body("Lỗi cập nhật số lượng: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+            return ResponseEntity.status(500)
+                    .body("Lỗi cập nhật số lượng: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
         }
     }
 
@@ -144,12 +157,25 @@ public class CartController {
     public ResponseEntity<?> removeItem(@RequestParam Integer userId, @RequestParam Integer productId) {
         try {
             Cart cart = getOrCreateCart(userId);
-            cartItemRepository.deleteByCartCartIdAndProductProductId(cart.getCartId(), productId);
-            // Refresh cart
-            cart = cartRepository.findById(cart.getCartId()).orElse(cart);
+
+            Optional<CartItem> itemToRemove = cart.getItems().stream()
+                    .filter(i -> i.getProduct() != null
+                              && i.getProduct().getProductId().equals(productId))
+                    .findFirst();
+
+            if (itemToRemove.isPresent()) {
+                CartItem item = itemToRemove.get();
+                if (cart.getItems() != null) {
+                    cart.getItems().remove(item);
+                }
+                cartItemRepository.delete(item);
+                cart = cartRepository.save(cart);
+            }
+
             return ResponseEntity.ok(toDto(cart));
         } catch (Exception ex) {
-            return ResponseEntity.status(500).body("Lỗi xóa sản phẩm khỏi giỏ: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+            return ResponseEntity.status(500)
+                    .body("Lỗi xóa sản phẩm: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
         }
     }
 
