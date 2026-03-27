@@ -217,10 +217,6 @@
 
                     <div class="col-md-8">
                         <div class="kv-row">
-                            <span class="kv-key">User ID</span>
-                            <span class="kv-val" id="userIdValue">-</span>
-                        </div>
-                        <div class="kv-row">
                             <span class="kv-key">Tên đăng nhập</span>
                             <span class="kv-val" id="usernameValue">-</span>
                         </div>
@@ -237,20 +233,12 @@
                             <span class="kv-val" id="addressValue">-</span>
                         </div>
                         <div class="kv-row">
-                            <span class="kv-key">Quyền</span>
+                            <span class="kv-key">Vai trò</span>
                             <span class="kv-val" id="roleNameValue">-</span>
-                        </div>
-                        <div class="kv-row">
-                            <span class="kv-key">Role ID</span>
-                            <span class="kv-val" id="roleIdValue">-</span>
                         </div>
                         <div class="kv-row">
                             <span class="kv-key">Trạng thái</span>
                             <span class="kv-val" id="isActiveValue">-</span>
-                        </div>
-                        <div class="kv-row">
-                            <span class="kv-key">Avatar URL</span>
-                            <span class="kv-val" id="avatarUrlValue">-</span>
                         </div>
                         <div class="kv-row">
                             <span class="kv-key">Ngày tạo</span>
@@ -298,15 +286,12 @@
 
             const data = await res.json();
             document.getElementById('displayUsername').textContent = data.username || 'Khách';
-            document.getElementById('userIdValue').textContent = data.userId ?? '-';
             document.getElementById('usernameValue').textContent = data.username || '-';
             document.getElementById('emailValue').textContent = data.email || '-';
             document.getElementById('phoneValue').textContent = data.phone || 'Chưa có';
             document.getElementById('addressValue').textContent = data.address || 'Chưa có';
             document.getElementById('roleNameValue').textContent = data.roleName || 'Chưa rõ';
-            document.getElementById('roleIdValue').textContent = data.roleId ?? '-';
             document.getElementById('isActiveValue').textContent = data.isActive ? 'Đang hoạt động' : 'Tạm ngừng';
-            document.getElementById('avatarUrlValue').textContent = data.avatarUrl || 'Chưa có';
             document.getElementById('createdAtValue').textContent = data.createdAt ? new Date(data.createdAt).toLocaleString('vi-VN') : '-';
 
             const defaultAvatar = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(

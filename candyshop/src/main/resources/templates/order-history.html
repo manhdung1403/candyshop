@@ -118,9 +118,10 @@
         <div class="order-table" id="orderWrapper">
             <h2>Lịch sử đơn hàng</h2>
             <div id="adminUserFilter" style="display:none; margin-bottom:10px;">
-                <input type="number" id="filterUserId" class="form-control"
-                    placeholder="Nhập userId để xem đơn hàng của user">
-                <button class="btn btn-primary mt-2" id="filterBtn">Xem đơn của user</button>
+                <div class="mb-2">
+                    <input type="date" id="filterOrderDate" class="form-control" placeholder="Chọn ngày đặt hàng">
+                </div>
+                <button class="btn btn-primary mt-2" id="filterBtn">Lọc đơn</button>
             </div>
             <div class="spinner-wrap" id="orderLoading">
                 <div class="spinner-candy"></div>
@@ -198,9 +199,23 @@
             filterBtn.addEventListener('click', async () => {
                 const user = getCurrentUser();
                 if (!user || !isAdminUser()) return;
-                const filterUserId = Number(document.getElementById('filterUserId').value);
-                const targetParam = filterUserId ? `&targetUserId=${filterUserId}` : '';
-                const res = await fetch(`/api/orders?userId=${user.userId}${targetParam}`);
+
+                const params = new URLSearchParams({ userId: user.userId });
+                const orderDate = document.getElementById('filterOrderDate').value;
+
+                if (orderDate) {
+                    params.append('orderDate', orderDate);
+                } else if (orderMonthYear) {
+                    const [y, m] = orderMonthYear.split('-');
+                    if (y && m) {
+                        params.append('orderYear', y);
+                        params.append('orderMonth', m);
+                    }
+                } else if (orderYear) {
+                    params.append('orderYear', orderYear);
+                }
+
+                const res = await fetch(`/api/orders?${params.toString()}`);
                 if (!res.ok) {
                     showToast('Không thể tải đơn hàng.', 'error');
                     return;

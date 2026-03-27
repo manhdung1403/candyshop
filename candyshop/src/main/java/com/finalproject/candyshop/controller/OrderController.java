@@ -3,6 +3,7 @@ package com.finalproject.candyshop.controller;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
@@ -177,21 +178,68 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<?> getOrdersByUser(@RequestParam Integer userId,
-            @RequestParam(required = false) Integer targetUserId) {
+            @RequestParam(required = false) Integer targetUserId,
+            @RequestParam(required = false) String orderDate,
+            @RequestParam(required = false) Integer orderMonth,
+            @RequestParam(required = false) Integer orderYear) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null)
             return ResponseEntity.badRequest().body("Người dùng không tồn tại.");
 
+        LocalDateTime fromDateTime = null;
+        LocalDateTime toDateTime = null;
+
+        if (orderDate != null && !orderDate.isBlank()) {
+            try {
+                LocalDate d = LocalDate.parse(orderDate);
+                fromDateTime = d.atStartOfDay();
+                toDateTime = d.atTime(23, 59, 59, 999_999_999);
+            } catch (DateTimeParseException e) {
+                return ResponseEntity.badRequest().body("orderDate không hợp lệ (yyyy-MM-dd). ");
+            }
+        } else if (orderMonth != null && orderYear != null) {
+            try {
+                LocalDate start = LocalDate.of(orderYear, orderMonth, 1);
+                LocalDate end = start.plusMonths(1).minusDays(1);
+                fromDateTime = start.atStartOfDay();
+                toDateTime = end.atTime(23, 59, 59, 999_999_999);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("orderMonth/orderYear không hợp lệ.");
+            }
+        } else if (orderYear != null) {
+            try {
+                LocalDate start = LocalDate.of(orderYear, 1, 1);
+                LocalDate end = LocalDate.of(orderYear, 12, 31);
+                fromDateTime = start.atStartOfDay();
+                toDateTime = end.atTime(23, 59, 59, 999_999_999);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("orderYear không hợp lệ.");
+            }
+        }
+
         if (isAdminUser(userId)) {
+            if (targetUserId != null && fromDateTime != null) {
+                return ResponseEntity.ok(orderRepository.findByUserUserIdAndOrderDateBetweenOrderByOrderDateDesc(
+                        targetUserId, fromDateTime, toDateTime));
+            }
             if (targetUserId != null) {
                 return ResponseEntity.ok(orderRepository.findByUserUserIdOrderByOrderDateDesc(targetUserId));
+            }
+            if (fromDateTime != null) {
+                return ResponseEntity
+                        .ok(orderRepository.findByOrderDateBetweenOrderByOrderDateDesc(fromDateTime, toDateTime));
             }
             List<Order> allOrders = orderRepository.findAll(Sort.by(Sort.Direction.DESC, "orderDate"));
             return ResponseEntity.ok(allOrders);
         }
 
-        if (!userId.equals(targetUserId) && targetUserId != null) {
+        if (targetUserId != null && !userId.equals(targetUserId)) {
             return ResponseEntity.status(403).body("Không được phép xem đơn hàng của người khác.");
+        }
+
+        if (fromDateTime != null) {
+            return ResponseEntity.ok(orderRepository.findByUserUserIdAndOrderDateBetweenOrderByOrderDateDesc(userId,
+                    fromDateTime, toDateTime));
         }
 
         List<Order> orders = orderRepository.findByUserUserIdOrderByOrderDateDesc(userId);
