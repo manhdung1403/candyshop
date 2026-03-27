@@ -266,7 +266,7 @@
             font-weight: 700;
             color: var(--candy-mint);
         }
-        
+
         .card-stock-info.empty {
             color: #ff4d4d;
         }
@@ -321,7 +321,7 @@
         .btn-add-cart:hover {
             background: #09a38d;
         }
-        
+
         /* Chặn nút nếu đã thêm tối đa hoặc hết hàng */
         .btn-add-cart.disabled {
             background: #e0e0e0;
@@ -724,7 +724,7 @@
             <input type="text" class="nav-search" id="searchInput" placeholder="🔍  Tìm sản phẩm...">
             <div class="ms-auto d-flex gap-2 align-items-center">
                 <a href="/orders" class="btn-logout"><i class="bi bi-clock-history"></i> Lịch sử</a>
-                <a href="/statistics" class="btn-logout"><i class="bi bi-bar-chart"></i> Thống kê</a>
+                <a href="/statistics" id="statsLink" class="btn-logout"><i class="bi bi-bar-chart"></i> Thống kê</a>
                 <a href="/cart" class="btn-logout" id="cartLink">
                     <i class="bi bi-cart3"></i> Giỏ hàng (<span id="cartCount">0</span>)
                 </a>
@@ -910,9 +910,9 @@
         let categories = [];
         let deleteTargetId = null;
         let activeCategory = '';
-        
+
         // Lưu trữ số lượng sản phẩm đã có trong giỏ hàng (key: productId, value: quantity)
-        let cartItemsMap = {}; 
+        let cartItemsMap = {};
 
         const productModal = new bootstrap.Modal(document.getElementById('productModal'));
         const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
@@ -989,7 +989,7 @@
             const latest = [...products].sort((a, b) => (b.productId || 0) - (a.productId || 0)).slice(0, 5);
             container.innerHTML = latest.map(p => {
                 const isOutOfStock = p.stockQuantity <= 0;
-                
+
                 return `
                 <div class="product-card" onclick="openDetailModal(${p.productId})">
                     <div class="card-image-wrap">
@@ -1027,13 +1027,22 @@
                 const inCartQty = cartItemsMap[p.productId] || 0;
                 // Kiểm tra xem đã hết kho hoàn toàn chưa, hoặc số lượng trong giỏ đã đạt mức tối đa chưa
                 const isOutOfStock = p.stockQuantity <= 0;
-                const isMaxReached = (p.stockQuantity - inCartQty) <= 0 && !isOutOfStock; 
+                const isMaxReached = (p.stockQuantity - inCartQty) <= 0 && !isOutOfStock;
                 const isDisabled = isOutOfStock || isMaxReached;
 
                 // Chọn text cho nút bấm
                 let btnText = 'Thêm vào giỏ';
                 if (isOutOfStock) btnText = 'Hết hàng';
                 else if (isMaxReached) btnText = 'Đã tối đa';
+
+                const adminActions = isAdminUser() ? `
+                    <button class="btn-edit" onclick="openEditModal(${p.productId})" title="Sửa">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn-delete" onclick="openDeleteModal(${p.productId}, '${escapeHtml(p.nameProduct)}')" title="Xóa">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                ` : '';
 
                 return `
             <div class="product-card" onclick="openDetailModal(${p.productId})">
@@ -1061,12 +1070,7 @@
                         <button class="btn-detail" onclick="openDetailModal(${p.productId})">
                             <i class="bi bi-eye"></i> Chi tiết
                         </button>
-                        <button class="btn-edit" onclick="openEditModal(${p.productId})" title="Sửa">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn-delete" onclick="openDeleteModal(${p.productId}, '${escapeHtml(p.nameProduct)}')" title="Xóa">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        ${adminActions}
                     </div>
                 </div>
             </div>
@@ -1162,6 +1166,11 @@
 
         // ===== SUBMIT PRODUCT (ADD / EDIT) =====
         async function submitProduct() {
+            const user = getCurrentUser();
+            if (!user || !isAdminUser()) {
+                showToast('Chỉ Admin mới được thêm/sửa sản phẩm.', 'error');
+                return;
+            }
             const name = document.getElementById('productName').value.trim();
             const price = document.getElementById('productPrice').value;
             if (!name || !price) { showToast('Vui lòng điền tên và giá sản phẩm!', 'error'); return; }
@@ -1178,7 +1187,7 @@
             const imageFile = document.getElementById('productImage').files[0];
             if (imageFile) formData.append('imageFile', imageFile);
 
-            const url = id ? `/api/products/${id}` : '/api/products';
+            const url = id ? `/api/products/${id}?userId=${user.userId}` : `/api/products?userId=${user.userId}`;
             const method = id ? 'PUT' : 'POST';
 
             const res = await fetch(url, { method, body: formData });
@@ -1195,7 +1204,12 @@
         // ===== CONFIRM DELETE =====
         async function confirmDelete() {
             if (!deleteTargetId) return;
-            const res = await fetch(`/api/products/${deleteTargetId}`, { method: 'DELETE' });
+            const user = getCurrentUser();
+            if (!user || !isAdminUser()) {
+                showToast('Chỉ Admin mới được xóa sản phẩm.', 'error');
+                return;
+            }
+            const res = await fetch(`/api/products/${deleteTargetId}?userId=${user.userId}`, { method: 'DELETE' });
             if (res.ok) {
                 deleteModal.hide();
                 showToast('🗑️ Đã xóa sản phẩm!', 'success');
@@ -1267,11 +1281,25 @@
             }
         }
 
+        function isAdminUser() {
+            const user = getCurrentUser();
+            if (!user) return false;
+            return user.roleId === 1 || String(user.roleName).toLowerCase() === 'admin';
+        }
+
         function loadUserFromStorage() {
             const user = getCurrentUser();
             const greeting = document.getElementById('userGreeting');
             if (user && greeting) {
                 greeting.innerHTML = `<i class="bi bi-person-circle"></i> ${user.username}`;
+            }
+            const addBtn = document.querySelector('.btn-add-product');
+            if (addBtn) {
+                addBtn.style.display = isAdminUser() ? 'inline-flex' : 'none';
+            }
+            const statsLink = document.getElementById('statsLink');
+            if (statsLink) {
+                statsLink.style.display = isAdminUser() ? 'inline-flex' : 'none';
             }
         }
 
@@ -1308,17 +1336,17 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: user.userId, productId, quantity })
                 });
-                
+
                 if (!res.ok) {
                     const msg = await res.text();
                     showToast(msg || 'Không thể thêm vào giỏ hàng.', 'error');
                     return;
                 }
-                
+
                 // Nếu thêm thành công, cập nhật số lượng locally và render lại giao diện
                 cartItemsMap[productId] = (cartItemsMap[productId] || 0) + quantity;
                 filterProducts(); // render lại danh sách với trạng thái nút bấm mới
-                
+
                 await updateCartCount();
                 showToast('Đã thêm vào giỏ hàng!', 'success');
             } catch (e) {

@@ -51,7 +51,12 @@
             const box = document.getElementById('messageBox');
             if (res.ok) {
                 const data = await res.json();
-                localStorage.setItem('candyUser', JSON.stringify({ userId: data.userId, username: data.username }));
+                localStorage.setItem('candyUser', JSON.stringify({
+                    userId: data.userId,
+                    username: data.username,
+                    roleId: data.roleId,
+                    roleName: data.roleName
+                }));
                 box.className = 'alert alert-success';
                 box.innerText = data.message || 'Đăng nhập thành công!';
                 setTimeout(() => window.location.href = '/', 1000);

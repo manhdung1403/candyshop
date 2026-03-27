@@ -26,18 +26,40 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.finalproject.candyshop.entity.Category;
 import com.finalproject.candyshop.entity.Product;
+import com.finalproject.candyshop.entity.Role;
 import com.finalproject.candyshop.repository.CategoryRepository;
 import com.finalproject.candyshop.repository.ProductRepository;
+import com.finalproject.candyshop.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
-    @Autowired private ProductRepository productRepository;
-    @Autowired private CategoryRepository categoryRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    // Lưu vào static/uploads - Spring Boot tự serve /uploads/** không cần config thêm
+    // Lưu vào static/uploads - Spring Boot tự serve /uploads/** không cần config
+    // thêm
     private final String UPLOAD_DIR = "src/main/resources/static/uploads/";
+
+    private boolean isAdminUser(Integer userId) {
+        if (userId == null)
+            return false;
+        return userRepository.findById(userId)
+                .filter(user -> user.getRole() != null)
+                .map(user -> {
+                    Role r = user.getRole();
+                    return (r.getRoleId() != null && r.getRoleId() == 1) || "Admin".equalsIgnoreCase(r.getRoleName());
+                }).orElse(false);
+    }
+
+    private ResponseEntity<String> unauthorizedResponse() {
+        return ResponseEntity.status(403).body("Chỉ Admin mới được thực hiện hành động này.");
+    }
 
     // GET all products (có thể lọc theo category hoặc keyword)
     @GetMapping
@@ -64,12 +86,16 @@ public class ProductController {
     // POST create product (multipart/form-data)
     @PostMapping
     public ResponseEntity<?> createProduct(
+            @RequestParam Integer userId,
             @RequestParam String nameProduct,
             @RequestParam BigDecimal price,
             @RequestParam Integer stockQuantity,
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) String expiryDate,
             @RequestParam(required = false) MultipartFile imageFile) {
+
+        if (!isAdminUser(userId))
+            return unauthorizedResponse();
 
         Product product = new Product();
         product.setNameProduct(nameProduct);
@@ -86,7 +112,8 @@ public class ProductController {
         // Xử lý ảnh tải lên
         if (imageFile != null && !imageFile.isEmpty()) {
             String imageUrl = saveImage(imageFile);
-            if (imageUrl != null) product.setImageUrl(imageUrl);
+            if (imageUrl != null)
+                product.setImageUrl(imageUrl);
         }
 
         return ResponseEntity.ok(productRepository.save(product));
@@ -96,6 +123,7 @@ public class ProductController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(
             @PathVariable Integer id,
+            @RequestParam Integer userId,
             @RequestParam String nameProduct,
             @RequestParam BigDecimal price,
             @RequestParam Integer stockQuantity,
@@ -103,8 +131,12 @@ public class ProductController {
             @RequestParam(required = false) String expiryDate,
             @RequestParam(required = false) MultipartFile imageFile) {
 
+        if (!isAdminUser(userId))
+            return unauthorizedResponse();
+
         Optional<Product> optProduct = productRepository.findById(id);
-        if (optProduct.isEmpty()) return ResponseEntity.notFound().build();
+        if (optProduct.isEmpty())
+            return ResponseEntity.notFound().build();
 
         Product product = optProduct.get();
         product.setNameProduct(nameProduct);
@@ -125,7 +157,8 @@ public class ProductController {
         // Nếu có ảnh mới thì cập nhật
         if (imageFile != null && !imageFile.isEmpty()) {
             String imageUrl = saveImage(imageFile);
-            if (imageUrl != null) product.setImageUrl(imageUrl);
+            if (imageUrl != null)
+                product.setImageUrl(imageUrl);
         }
 
         return ResponseEntity.ok(productRepository.save(product));
@@ -133,8 +166,12 @@ public class ProductController {
 
     // DELETE product
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
-        if (!productRepository.existsById(id)) return ResponseEntity.notFound().build();
+    public ResponseEntity<?> deleteProduct(@PathVariable Integer id,
+            @RequestParam Integer userId) {
+        if (!isAdminUser(userId))
+            return unauthorizedResponse();
+        if (!productRepository.existsById(id))
+            return ResponseEntity.notFound().build();
         productRepository.deleteById(id);
         return ResponseEntity.ok("Đã xóa sản phẩm!");
     }
@@ -155,7 +192,8 @@ public class ProductController {
             String filename = UUID.randomUUID() + ext;
 
             Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+            if (!Files.exists(uploadPath))
+                Files.createDirectories(uploadPath);
 
             Files.copy(file.getInputStream(), uploadPath.resolve(filename),
                     StandardCopyOption.REPLACE_EXISTING);

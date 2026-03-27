@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,11 +35,28 @@ import com.finalproject.candyshop.repository.UserRepository;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private CartRepository cartRepository;
-    @Autowired private UserRepository userRepository;
-    @Autowired private ProductRepository productRepository;
-    @Autowired private com.finalproject.candyshop.repository.OrderItemRepository orderItemRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private CartRepository cartRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private com.finalproject.candyshop.repository.OrderItemRepository orderItemRepository;
+
+    private boolean isAdminUser(Integer userId) {
+        if (userId == null)
+            return false;
+        return userRepository.findById(userId)
+                .filter(u -> u.getRole() != null)
+                .map(u -> {
+                    Integer rId = u.getRole().getRoleId();
+                    String rName = u.getRole().getRoleName();
+                    return (rId != null && rId == 1) || "admin".equalsIgnoreCase(rName);
+                }).orElse(false);
+    }
 
     @PostMapping("/checkout")
     @Transactional
@@ -49,26 +67,30 @@ public class OrderController {
             @RequestParam String recipientAddress,
             @RequestParam String deliveryDate) {
 
-        if (recipientName == null || recipientName.isBlank() || recipientPhone == null || recipientPhone.isBlank() || recipientAddress == null || recipientAddress.isBlank() || deliveryDate == null || deliveryDate.isBlank()) {
-            return ResponseEntity.badRequest().body("Vui lòng điền đủ họ tên, số điện thoại, địa chỉ giao hàng và ngày giao hàng.");
+        if (recipientName == null || recipientName.isBlank() || recipientPhone == null || recipientPhone.isBlank()
+                || recipientAddress == null || recipientAddress.isBlank() || deliveryDate == null
+                || deliveryDate.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body("Vui lòng điền đủ họ tên, số điện thoại, địa chỉ giao hàng và ngày giao hàng.");
         }
 
         User user = userRepository.findById(userId).orElse(null);
-        if (user == null) return ResponseEntity.badRequest().body("Người dùng không tồn tại.");
+        if (user == null)
+            return ResponseEntity.badRequest().body("Người dùng không tồn tại.");
 
         Cart cart = cartRepository.findByUserUserId(userId).orElse(null);
         if (cart == null || cart.getItems().isEmpty()) {
             return ResponseEntity.badRequest().body("Giỏ hàng trống.");
         }
 
-        // Tổng hợp số lượng theo từng sản phẩm để kiểm tra tồn kho & cập nhật đồng nhất.
+        // Tổng hợp số lượng theo từng sản phẩm để kiểm tra tồn kho & cập nhật đồng
+        // nhất.
         Map<Integer, Integer> qtyByProductId = cart.getItems().stream()
                 .filter(i -> i != null && i.getProduct() != null && i.getProduct().getProductId() != null)
                 .collect(Collectors.toMap(
                         i -> i.getProduct().getProductId(),
                         i -> i.getQuantity() == null ? 0 : i.getQuantity(),
-                        Integer::sum
-                ));
+                        Integer::sum));
 
         if (qtyByProductId.isEmpty()) {
             return ResponseEntity.badRequest().body("Giỏ hàng không hợp lệ.");
@@ -116,8 +138,10 @@ public class OrderController {
             Integer qty = e.getValue();
 
             Product product = productsById.get(productId);
-            // qtyByProductId đã được validate nên product cũng không null theo logic phía trên.
-            if (product == null) continue;
+            // qtyByProductId đã được validate nên product cũng không null theo logic phía
+            // trên.
+            if (product == null)
+                continue;
 
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(product);
@@ -137,7 +161,8 @@ public class OrderController {
             Integer productId = e.getKey();
             Integer qty = e.getValue();
             Product product = productsById.get(productId);
-            if (product == null) continue;
+            if (product == null)
+                continue;
 
             int stock = product.getStockQuantity() == null ? 0 : product.getStockQuantity();
             product.setStockQuantity(stock - qty);
@@ -151,42 +176,63 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getOrdersByUser(@RequestParam Integer userId) {
+    public ResponseEntity<?> getOrdersByUser(@RequestParam Integer userId,
+            @RequestParam(required = false) Integer targetUserId) {
         User user = userRepository.findById(userId).orElse(null);
-        if (user == null) return ResponseEntity.badRequest().body("Người dùng không tồn tại.");
+        if (user == null)
+            return ResponseEntity.badRequest().body("Người dùng không tồn tại.");
+
+        if (isAdminUser(userId)) {
+            if (targetUserId != null) {
+                return ResponseEntity.ok(orderRepository.findByUserUserIdOrderByOrderDateDesc(targetUserId));
+            }
+            List<Order> allOrders = orderRepository.findAll(Sort.by(Sort.Direction.DESC, "orderDate"));
+            return ResponseEntity.ok(allOrders);
+        }
+
+        if (!userId.equals(targetUserId) && targetUserId != null) {
+            return ResponseEntity.status(403).body("Không được phép xem đơn hàng của người khác.");
+        }
 
         List<Order> orders = orderRepository.findByUserUserIdOrderByOrderDateDesc(userId);
         return ResponseEntity.ok(orders);
     }
 
     @GetMapping("/statistics")
-    public Map<String, Object> getStatistics() {
+    public ResponseEntity<?> getStatistics(@RequestParam Integer userId) {
+        if (!isAdminUser(userId)) {
+            return ResponseEntity.status(403).body("Chỉ Admin mới được xem thống kê.");
+        }
+
         Long totalOrders = orderRepository.getTotalOrders();
         BigDecimal totalRevenue = orderRepository.getTotalRevenue();
-        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
+        if (totalRevenue == null)
+            totalRevenue = BigDecimal.ZERO;
 
         // Thống kê bán hàng theo sản phẩm
         List<Object[]> bestByQty = orderItemRepository.findProductSalesByQuantity();
         List<Object[]> bestByRevenue = orderItemRepository.findProductSalesByRevenue();
 
-        long totalProductsSold = bestByQty.stream().mapToLong(r -> r[1] != null ? ((Number) r[1]).longValue() : 0L).sum();
+        long totalProductsSold = bestByQty.stream().mapToLong(r -> r[1] != null ? ((Number) r[1]).longValue() : 0L)
+                .sum();
 
         List<ProductSalesDto> topQuantity = bestByQty.stream().limit(5).map(r -> new ProductSalesDto(
                 (String) r[0],
                 r[1] != null ? ((Number) r[1]).longValue() : 0L,
-                r[2] != null ? (BigDecimal) r[2] : BigDecimal.ZERO
-        )).toList();
+                r[2] != null ? (BigDecimal) r[2] : BigDecimal.ZERO)).toList();
 
         List<ProductSalesDto> topRevenue = bestByRevenue.stream().limit(5).map(r -> new ProductSalesDto(
                 (String) r[0],
                 r[1] != null ? ((Number) r[1]).longValue() : 0L,
-                r[2] != null ? (BigDecimal) r[2] : BigDecimal.ZERO
-        )).toList();
+                r[2] != null ? (BigDecimal) r[2] : BigDecimal.ZERO)).toList();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalOrders", totalOrders != null ? totalOrders : 0L);
         stats.put("totalRevenue", totalRevenue);
-        stats.put("averageOrder", (totalOrders != null && totalOrders > 0) ? totalRevenue.divide(BigDecimal.valueOf(totalOrders), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO);
+        stats.put("averageOrder",
+                (totalOrders != null && totalOrders > 0)
+                        ? totalRevenue.divide(BigDecimal.valueOf(totalOrders), 2, RoundingMode.HALF_UP)
+                        : BigDecimal.ZERO);
         stats.put("totalProductsSold", totalProductsSold);
         stats.put("topProductsByQuantity", topQuantity);
         stats.put("topProductsByRevenue", topRevenue);
@@ -205,6 +251,6 @@ public class OrderController {
             stats.put("highestRevenueProduct", null);
         }
 
-        return stats;
+        return ResponseEntity.ok(stats);
     }
 }

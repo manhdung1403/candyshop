@@ -117,6 +117,11 @@
     <div class="container mt-5">
         <div class="order-table" id="orderWrapper">
             <h2>Lịch sử đơn hàng</h2>
+            <div id="adminUserFilter" style="display:none; margin-bottom:10px;">
+                <input type="number" id="filterUserId" class="form-control"
+                    placeholder="Nhập userId để xem đơn hàng của user">
+                <button class="btn btn-primary mt-2" id="filterBtn">Xem đơn của user</button>
+            </div>
             <div class="spinner-wrap" id="orderLoading">
                 <div class="spinner-candy"></div>
             </div>
@@ -128,6 +133,10 @@
     <script>
         function getCurrentUser() {
             try { return JSON.parse(localStorage.getItem('candyUser')) || null; } catch (e) { return null; }
+        }
+        function isAdminUser() {
+            const user = getCurrentUser();
+            return user ? user.roleId === 1 || String(user.roleName).toLowerCase() === 'admin' : false;
         }
         function showToast(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -143,17 +152,27 @@
             const user = getCurrentUser();
             if (!user) { window.location.href = '/login'; return; }
 
-            const res = await fetch(`/api/orders?userId=${user.userId}`);
+            const adminUserFilter = document.getElementById('adminUserFilter');
+            if (adminUserFilter) {
+                adminUserFilter.style.display = isAdminUser() ? 'block' : 'none';
+            }
+
+            const apiUrl = `/api/orders?userId=${user.userId}`;
+            const res = await fetch(apiUrl);
             if (!res.ok) {
                 showToast('Không thể tải lịch sử đơn hàng.', 'error');
                 return;
             }
             const orders = await res.json();
+            renderOrders(orders);
+        }
+
+        function renderOrders(orders) {
             const content = document.getElementById('orderContent');
             document.getElementById('orderLoading').style.display = 'none';
 
-            if (!orders.length) {
-                content.innerHTML = `<div class="empty-state"><span class="emoji">📦</span><h4>Bạn chưa có đơn hàng nào.</h4><p>Đặt hàng để xem lịch sử ở đây.</p></div>`;
+            if (!orders || !orders.length) {
+                content.innerHTML = `<div class="empty-state"><span class="emoji">📦</span><h4>Chưa có đơn hàng.</h4><p>Đặt hàng để xem lịch sử ở đây.</p></div>`;
                 return;
             }
 
@@ -173,6 +192,23 @@
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('candyUser'); window.location.href = '/login'; });
+
+        const filterBtn = document.getElementById('filterBtn');
+        if (filterBtn) {
+            filterBtn.addEventListener('click', async () => {
+                const user = getCurrentUser();
+                if (!user || !isAdminUser()) return;
+                const filterUserId = Number(document.getElementById('filterUserId').value);
+                const targetParam = filterUserId ? `&targetUserId=${filterUserId}` : '';
+                const res = await fetch(`/api/orders?userId=${user.userId}${targetParam}`);
+                if (!res.ok) {
+                    showToast('Không thể tải đơn hàng.', 'error');
+                    return;
+                }
+                const orders = await res.json();
+                renderOrders(orders);
+            });
+        }
 
         loadOrders();
     </script>
