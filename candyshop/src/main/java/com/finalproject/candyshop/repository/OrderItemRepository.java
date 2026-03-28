@@ -14,4 +14,6 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
 
     @Query("SELECT oi.product.nameProduct, SUM(oi.quantity), SUM(oi.subtotal) FROM OrderItem oi GROUP BY oi.product.productId ORDER BY SUM(oi.subtotal) DESC")
     List<Object[]> findProductSalesByRevenue();
+
+    void deleteByProductProductId(Integer productId);
 }

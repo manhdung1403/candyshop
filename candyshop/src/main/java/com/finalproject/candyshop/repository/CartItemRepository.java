@@ -8,4 +8,5 @@ import java.util.List;
 public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
     List<CartItem> findByCartCartId(Integer cartId);
     void deleteByCartCartIdAndProductProductId(Integer cartId, Integer productId);
+    void deleteByProductProductId(Integer productId);
 }

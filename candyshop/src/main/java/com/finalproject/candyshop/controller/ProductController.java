@@ -27,7 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.finalproject.candyshop.entity.Category;
 import com.finalproject.candyshop.entity.Product;
 import com.finalproject.candyshop.entity.Role;
+import com.finalproject.candyshop.repository.CartItemRepository;
 import com.finalproject.candyshop.repository.CategoryRepository;
+import com.finalproject.candyshop.repository.OrderItemRepository;
 import com.finalproject.candyshop.repository.ProductRepository;
 import com.finalproject.candyshop.repository.UserRepository;
 
@@ -39,6 +41,10 @@ public class ProductController {
     private ProductRepository productRepository;
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private CartItemRepository cartItemRepository;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
     @Autowired
     private UserRepository userRepository;
 
@@ -166,12 +172,15 @@ public class ProductController {
 
     // DELETE product
     @DeleteMapping("/{id}")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> deleteProduct(@PathVariable Integer id,
             @RequestParam Integer userId) {
         if (!isAdminUser(userId))
             return unauthorizedResponse();
         if (!productRepository.existsById(id))
             return ResponseEntity.notFound().build();
+        cartItemRepository.deleteByProductProductId(id);
+        orderItemRepository.deleteByProductProductId(id);
         productRepository.deleteById(id);
         return ResponseEntity.ok("Đã xóa sản phẩm!");
     }
